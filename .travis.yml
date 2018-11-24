@@ -12,4 +12,5 @@ install:
 script: pytest -q aioetherscan/tests/
 
 after_success:
+  - poetry run coverage run --source=aioetherscan -m pytest 
   - coveralls
