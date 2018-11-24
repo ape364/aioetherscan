@@ -7,7 +7,7 @@
 [![Versions](https://img.shields.io/pypi/pyversions/aioetherscan.svg)](https://pypi.org/project/aioetherscan/)
 
 
-Etherscan.io [API](https://etherscan.io/apis) async Python non-official wrapper. Tested only with Python 3.7.
+[Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper. Tested only with Python 3.7.
 
 ## Features
 Supports all API modules:
