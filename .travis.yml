@@ -10,3 +10,6 @@ install:
   - poetry install -v
 
 script: pytest -q aioetherscan/tests/
+
+after_success:
+  - coveralls
