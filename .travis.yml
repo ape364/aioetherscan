@@ -9,4 +9,4 @@ install:
   - source $HOME/.poetry/env
   - poetry install -v
 
-script: pytest -q tests/
+script: pytest -q aioetherscan/tests/
