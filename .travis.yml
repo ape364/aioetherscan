@@ -1,0 +1,9 @@
+language: python
+
+install:
+  - pip install pip -U
+  - python get-poetry.py --preview -y
+  - source $HOME/.poetry/env
+  - poetry install -v
+
+script: pytest -q tests/
