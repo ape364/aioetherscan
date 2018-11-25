@@ -53,3 +53,17 @@ async def test_close_session(client):
     with patch('aioetherscan.network.Network.close', new_callable=CoroutineMock) as m:
         await client.close()
         m.assert_called_once_with()
+
+
+@pytest.mark.asyncio
+async def test_networks():
+    with patch('aioetherscan.network.Network._set_network') as m:
+        c = Client('TestApiKey')
+        m.assert_called_once_with('main')
+        await c.close()
+
+    with patch('aioetherscan.network.Network._set_network') as m:
+        c = Client('TestApiKey', 'kovan')
+        m.assert_called_once_with('kovan')
+        await c.close()
+#

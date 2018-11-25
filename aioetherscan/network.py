@@ -16,10 +16,17 @@ class HttpMethod(Enum):
 
 
 class Network:
-    _BASE_URL = 'http://api.etherscan.io/api'
+    _NETWORKS = {
+        'main': 'https://api.etherscan.io/api',
+        'ropsten': 'https://api-ropsten.etherscan.io/api',  # ROPSTEN (Revival) TESTNET
+        'kovan': 'https://api-kovan.etherscan.io/api',  # KOVAN (POA) TESTNET
+        'rinkeby': 'https://api-rinkeby.etherscan.io/api',  # RINKEBY (CLIQUE) TESTNET
+        'tobalaba': 'https://api-tobalaba.etherscan.com/api'  # TOBALABA NETWORK
+    }
 
-    def __init__(self, api_key: str, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, api_key: str, network: str, loop: asyncio.AbstractEventLoop) -> None:
         self._API_KEY = api_key
+        self._set_network(network)
 
         self._loop = loop or asyncio.get_event_loop()
         self._session = aiohttp.ClientSession(loop=self._loop)
@@ -39,7 +46,7 @@ class Network:
     async def _request(self, method: HttpMethod, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
         session_method = getattr(self._session, method.value)
         async with self._throttler:
-            async with session_method(self._BASE_URL, params=params, data=data) as response:
+            async with session_method(self._API_URL, params=params, data=data) as response:
                 self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
                 return await self._handle_response(response)
 
@@ -80,3 +87,8 @@ class Network:
     @staticmethod
     def _filter_params(params: Dict) -> Dict:
         return {k: v for k, v in params.items() if v is not None}
+
+    def _set_network(self, network: str) -> None:
+        if network not in self._NETWORKS:
+            raise ValueError(f'Incorrect network {network!r}, supported only: {", ".join(self._NETWORKS.keys())}')
+        self._API_URL = self._NETWORKS[network]

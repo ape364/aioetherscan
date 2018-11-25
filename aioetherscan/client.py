@@ -12,8 +12,8 @@ from aioetherscan.network import Network
 
 
 class Client:
-    def __init__(self, api_key: str, loop: asyncio.AbstractEventLoop = None) -> None:
-        self._http = Network(api_key, loop)
+    def __init__(self, api_key: str, network: str = 'main', loop: asyncio.AbstractEventLoop = None) -> None:
+        self._http = Network(api_key, network, loop)
 
         self.account = Account(self)
         self.block = Block(self)

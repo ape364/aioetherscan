@@ -41,14 +41,14 @@ def apikey():
 
 @pytest.fixture()
 async def nw():
-    nw = Network(apikey(), get_loop())
+    nw = Network(apikey(), 'main', get_loop())
     yield nw
     await nw.close()
 
 
 def test_init():
     myloop = get_loop()
-    n = Network(apikey(), myloop)
+    n = Network(apikey(), 'main', myloop)
 
     assert n._API_KEY == apikey()
     assert n._loop == myloop
@@ -83,7 +83,6 @@ async def test_get(nw):
 
 @pytest.mark.asyncio
 async def test_post(nw):
-    test_url = 'http://test.url'
     with patch('aioetherscan.network.Network._request', new=CoroutineMock()) as mock:
         await nw.post()
         mock.assert_called_once_with(HttpMethod.POST, data={'apikey': nw._API_KEY})
@@ -108,13 +107,13 @@ async def test_request(nw):
     with asynctest.mock.patch('aiohttp.ClientSession.get', new_callable=MagicMockContext) as m:
         with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
             await nw._request(HttpMethod.GET)
-            m.assert_called_once_with('http://api.etherscan.io/api', data=None, params=None)
+            m.assert_called_once_with('https://api.etherscan.io/api', data=None, params=None)
             h.assert_called_once()
 
     with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
         with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
             await nw._request(HttpMethod.POST)
-            m.assert_called_once_with('http://api.etherscan.io/api', data=None, params=None)
+            m.assert_called_once_with('https://api.etherscan.io/api', data=None, params=None)
             h.assert_called_once()
 
     with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
@@ -170,3 +169,13 @@ async def test_close_session(nw):
     with patch('aiohttp.ClientSession.close', new_callable=CoroutineMock) as m:
         await nw.close()
         m.assert_called_once_with()
+
+
+def test_test_network():
+    nw = Network(apikey(), 'tobalaba', get_loop())
+    assert nw._API_URL == 'https://api-tobalaba.etherscan.com/api'
+
+
+def test_invalid_network():
+    with pytest.raises(ValueError):
+        Network(apikey(), 'wrong', get_loop())

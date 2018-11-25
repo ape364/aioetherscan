@@ -10,6 +10,9 @@
 [Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper. Tested only with Python 3.7.
 
 ## Features
+
+### API modules
+
 Supports all API modules:
 
 * [Accounts](https://etherscan.io/apis#accounts)
@@ -21,7 +24,21 @@ Supports all API modules:
 * [Tokens](https://etherscan.io/apis#tokens)
 * [Stats](https://etherscan.io/apis#stats)
 
-Also provides 3rd party `utils` module, which allows to fetch a lot of transactions without timeouts and getting banned.
+Also provides 3rd party `utils` module, which allows to fetch a lot of transactions without timeouts and not getting banned.
+
+### Networks
+
+Supports networks:
+
+* [Main](https://etherscan.io/)
+* [Ropsten](https://ropsten.etherscan.io/)
+* [Kovan](https://kovan.etherscan.io/)
+* [Rinkeby](https://rinkeby.etherscan.io/)
+* [Tobalaba](https://tobalaba.etherscan.com/)
+
+### Other
+
+* Rate limit is set to 5 requests/sec via [asyncio-throttle](https://github.com/hallazzang/asyncio-throttle)
 
 ## Installation
 
@@ -52,6 +69,3 @@ async def main():
 if __name__ == '__main__':
     asyncio.run(main())
 ```
-
-## TODO
-* Add test networks support
