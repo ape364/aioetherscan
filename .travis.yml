@@ -3,6 +3,11 @@ python: 3.7
 dist: xenial
 sudo: true
 
+cache:
+  pip: true
+  directories:
+    - "$HOME/.cache/pypoetry"
+
 install:
   - pip install pip -U
   - python get-poetry.py --preview -y
@@ -12,5 +17,5 @@ install:
 script: pytest -q aioetherscan/tests/
 
 after_success:
-  - poetry run coverage run --source=aioetherscan -m pytest 
+  - poetry run coverage run --source=aioetherscan -m pytest
   - coveralls
