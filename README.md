@@ -34,6 +34,7 @@ Supports networks:
 * [Ropsten](https://ropsten.etherscan.io/)
 * [Kovan](https://kovan.etherscan.io/)
 * [Rinkeby](https://rinkeby.etherscan.io/)
+* [Goerli](https://goerli.etherscan.io/)
 * [Tobalaba](https://tobalaba.etherscan.com/)
 
 ### Other

@@ -21,6 +21,7 @@ class Network:
         'ropsten': 'https://api-ropsten.etherscan.io/api',  # ROPSTEN (Revival) TESTNET
         'kovan': 'https://api-kovan.etherscan.io/api',  # KOVAN (POA) TESTNET
         'rinkeby': 'https://api-rinkeby.etherscan.io/api',  # RINKEBY (CLIQUE) TESTNET
+        'goerli': 'https://api-goerli.etherscan.io/api',  # GOERLI (GTH) TESTNET
         'tobalaba': 'https://api-tobalaba.etherscan.com/api'  # TOBALABA NETWORK
     }
 
