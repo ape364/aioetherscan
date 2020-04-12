@@ -157,3 +157,22 @@ async def test_token_transfers_generator(utils):
             break
 
         parse_mock.assert_called_once_with('addr', 0, 20, 3)
+
+
+@pytest.mark.asyncio
+async def test_is_contract(utils):
+    with asynctest.patch('aioetherscan.modules.contract.Contract.contract_abi', new=CoroutineMock()) as mock:
+        await utils.is_contract(address='addr')
+        mock.assert_called_once_with(address='addr')
+
+
+@pytest.mark.asyncio
+async def test_get_contract_creator(utils):
+    with asynctest.patch('aioetherscan.modules.account.Account.internal_txs', new=CoroutineMock()) as mock:
+        await utils.get_contract_creator(contract_address='addr')
+        mock.assert_called_once_with(
+            address='addr',
+            start_block=1,
+            page=1,
+            offset=1
+        )

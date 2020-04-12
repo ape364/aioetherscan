@@ -1,6 +1,6 @@
 import asyncio
 import itertools
-from typing import Tuple, Dict, List, Iterator, AsyncIterator
+from typing import Tuple, Dict, List, Iterator, AsyncIterator, Optional
 
 from aioetherscan.exceptions import EtherscanClientApiError
 
@@ -48,6 +48,25 @@ class Utils:
     ) -> List[Dict]:
         kwargs = {k: v for k, v in locals().items() if k != 'self' and not k.startswith('_')}
         return [t async for t in self.token_transfers_generator(**kwargs)]
+
+    async def is_contract(self, address: str) -> bool:
+        response = await self._client.contract.contract_abi(address=address)
+        return response['message'].lower() == 'ok'
+
+    async def get_contract_creator(self, contract_address: str) -> Optional[str]:
+        response = await self._client.account.internal_txs(
+            address=contract_address,
+            start_block=1,
+            page=1,
+            offset=1
+        )
+
+        try:
+            tx = next(i for i in response['result'])
+        except StopIteration:
+            return
+        else:
+            return tx['from'].lower()
 
     async def _parse_by_pages(self, contract_address: str, start_block: int, end_block: int, offset: int) -> List[Dict]:
         page, result = 1, []
