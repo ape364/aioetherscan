@@ -60,15 +60,15 @@ class Utils:
             return True if response else False
 
     async def get_contract_creator(self, contract_address: str) -> Optional[str]:
-        response = await self._client.account.internal_txs(
+        response = await self._client.account.normal_txs(
             address=contract_address,
             start_block=1,
             page=1,
             offset=1
-        )
+        )  # try to find first transaction
 
         try:
-            tx = next(i for i in response['result'])
+            tx = next(i for i in response)
         except StopIteration:
             return
         else:
