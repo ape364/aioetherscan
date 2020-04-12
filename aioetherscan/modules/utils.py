@@ -70,19 +70,22 @@ class Utils:
         except EtherscanClientApiError as e:
             if e.message.lower() != 'no transactions found':
                 raise
-            response = await self._client.account.normal_txs(
-                address=contract_address,
-                start_block=1,
-                page=1,
-                offset=1
-            )  # try to find first normal transaction
+            else:
+                response = None
 
-        try:
-            tx = next(i for i in response)
-        except StopIteration:
-            return
-        else:
-            return tx['from'].lower()
+        if not response:
+            try:
+                response = await self._client.account.normal_txs(
+                    address=contract_address,
+                    start_block=1,
+                    page=1,
+                    offset=1
+                )  # try to find first normal transaction
+            except EtherscanClientApiError as e:
+                if e.message.lower() != 'no transactions found':
+                    raise
+
+        return next((i['from'].lower() for i in response), None)
 
     async def _parse_by_pages(self, contract_address: str, start_block: int, end_block: int, offset: int) -> List[Dict]:
         page, result = 1, []
