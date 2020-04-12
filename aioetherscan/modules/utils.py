@@ -60,12 +60,22 @@ class Utils:
             return True if response else False
 
     async def get_contract_creator(self, contract_address: str) -> Optional[str]:
-        response = await self._client.account.normal_txs(
-            address=contract_address,
-            start_block=1,
-            page=1,
-            offset=1
-        )  # try to find first transaction
+        try:
+            response = await self._client.account.internal_txs(
+                address=contract_address,
+                start_block=1,
+                page=1,
+                offset=1
+            )  # try to find first internal transaction
+        except EtherscanClientApiError as e:
+            if e.message.lower() != 'no transactions found':
+                raise
+            response = await self._client.account.normal_txs(
+                address=contract_address,
+                start_block=1,
+                page=1,
+                offset=1
+            )  # try to find first normal transaction
 
         try:
             tx = next(i for i in response)
