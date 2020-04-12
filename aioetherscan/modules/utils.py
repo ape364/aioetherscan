@@ -50,8 +50,14 @@ class Utils:
         return [t async for t in self.token_transfers_generator(**kwargs)]
 
     async def is_contract(self, address: str) -> bool:
-        response = await self._client.contract.contract_abi(address=address)
-        return response['message'].lower() == 'ok'
+        try:
+            response = await self._client.contract.contract_abi(address=address)
+        except EtherscanClientApiError as e:
+            if e.message.upper() == 'NOTOK' and e.result.lower() == 'contract source code not verified':
+                return False
+            raise
+        else:
+            return True if response else False
 
     async def get_contract_creator(self, contract_address: str) -> Optional[str]:
         response = await self._client.account.internal_txs(
