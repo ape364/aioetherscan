@@ -168,7 +168,7 @@ async def test_is_contract(utils):
 
 @pytest.mark.asyncio
 async def test_get_contract_creator(utils):
-    with asynctest.patch('aioetherscan.modules.account.Account.internal_txs', new=CoroutineMock()) as mock:
+    with asynctest.patch('aioetherscan.modules.account.Account.normal_txs', new=CoroutineMock()) as mock:
         await utils.get_contract_creator(contract_address='addr')
         mock.assert_called_once_with(
             address='addr',
