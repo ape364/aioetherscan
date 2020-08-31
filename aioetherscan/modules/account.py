@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, List, Dict, Tuple
+from typing import Iterable, Optional, List, Dict
 
 from aioetherscan.common import check_tag
 from aioetherscan.modules.base import BaseModule
@@ -132,11 +132,6 @@ class Account(BaseModule):
             contractaddress=contract_address,
             tag=check_tag(tag)
         )
-
-    def _check(self, value: str, values: Tuple[str, ...]):
-        if value and value.lower() not in values:
-            raise ValueError(f'Invalid value {value!r}, only {values} are supported.')
-        return value
 
     def _check_sort_direction(self, sort: str) -> str:
         return self._check(sort, self._SORT_ORDERS)
