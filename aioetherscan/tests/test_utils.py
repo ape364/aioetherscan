@@ -33,13 +33,15 @@ async def test_parse_by_pages(utils):
     with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
         transfers_mock.side_effect = EtherscanClientApiError('No transactions found', None)
         await utils._parse_by_pages(
-            'addr',
             100,
             200,
-            5
+            5,
+            address='address',
+            contract_address='contract_address',
         )
         transfers_mock.assert_called_once_with(
-            contract_address='addr',
+            address='address',
+            contract_address='contract_address',
             start_block=100,
             end_block=200,
             page=1,
@@ -53,10 +55,11 @@ async def test_parse_by_pages_exception(utils):
         transfers_mock.side_effect = EtherscanClientApiError('other msg', None)
         try:
             await utils._parse_by_pages(
-                'addr',
                 100,
                 200,
-                5
+                5,
+                address='address',
+                contract_address='contract_address',
             )
         except EtherscanClientApiError as e:
             assert e.message == 'other msg'
@@ -78,29 +81,33 @@ async def test_parse_by_pages_result(utils):
     with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
         transfers_mock.side_effect = token_transfers_side_effect
         res = await utils._parse_by_pages(
-            'addr',
             100,
             200,
-            5
+            5,
+            address='address',
+            contract_address='contract_address',
         )
         transfers_mock.assert_has_calls(
             [
                 call(
-                    contract_address='addr',
+                    address='address',
+                    contract_address='contract_address',
                     start_block=100,
                     end_block=200,
                     page=1,
                     offset=5
                 ),
                 call(
-                    contract_address='addr',
+                    address='address',
+                    contract_address='contract_address',
                     start_block=100,
                     end_block=200,
                     page=2,
                     offset=5
                 ),
                 call(
-                    contract_address='addr',
+                    address='address',
+                    contract_address='contract_address',
                     start_block=100,
                     end_block=200,
                     page=3,
@@ -118,10 +125,11 @@ async def test_token_transfers(utils):
             new=MagicMock()
     ) as transfers_gen_mock:
         await utils.token_transfers(
-            contract_address='addr'
+            contract_address='contract_address'
         )
         transfers_gen_mock.assert_called_once_with(
-            contract_address='addr',
+            contract_address='contract_address',
+            address=None,
             be_polite=True,
             block_limit=50,
             offset=3,
@@ -136,27 +144,53 @@ async def test_token_transfers_generator(utils):
         with patch('aioetherscan.modules.proxy.Proxy.block_number', new=CoroutineMock()) as proxy_mock:
             proxy_mock.return_value = '0x14'
 
-            async for _ in utils.token_transfers_generator('addr'):
+            async for _ in utils.token_transfers_generator(address='addr'):
                 break
 
-            parse_mock.assert_called_once_with('addr', 0, 20, 3)
+            parse_mock.assert_called_once_with(
+                address='addr',
+                contract_address=None,
+                start_block=0,
+                end_block=20,
+                offset=3
+            )
 
     with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=CoroutineMock()) as parse_mock:
         with patch('aioetherscan.modules.proxy.Proxy.block_number', new=CoroutineMock()) as proxy_mock:
             with patch('asyncio.gather', new=CoroutineMock()) as asyncio_mock:
                 proxy_mock.return_value = '0x14'
 
-                async for _ in utils.token_transfers_generator('addr', be_polite=False):
+                async for _ in utils.token_transfers_generator(address='addr', be_polite=False):
                     break
 
-                parse_mock.assert_called_once_with('addr', 0, 20, 3)
+                parse_mock.assert_called_once_with(
+                    address='addr',
+                    contract_address=None,
+                    start_block=0,
+                    end_block=20,
+                    offset=3
+                )
                 asyncio_mock.assert_called_once()
 
     with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=CoroutineMock()) as parse_mock:
-        async for _ in utils.token_transfers_generator('addr', end_block=20):
+        async for _ in utils.token_transfers_generator(contract_address='contract_address', end_block=20):
             break
 
-        parse_mock.assert_called_once_with('addr', 0, 20, 3)
+        parse_mock.assert_called_once_with(
+            address=None,
+            contract_address='contract_address',
+            start_block=0,
+            end_block=20,
+            offset=3
+        )
+
+
+@pytest.mark.asyncio
+async def test_one_of_addresses_is_supplied(utils):
+    EXC_MESSAGE_RE = r'At least one of address or contract_address must be specified.'
+    with pytest.raises(ValueError, match=EXC_MESSAGE_RE) as excinfo:
+        async for _ in utils.token_transfers_generator(end_block=1):
+            break
 
 
 @pytest.mark.asyncio

@@ -13,24 +13,37 @@ class Utils:
 
     async def token_transfers_generator(
             self,
-            contract_address: str,
+            address: str = None,
+            contract_address: str = None,
             be_polite: bool = True,
             block_limit: int = 50,
             offset: int = 3,
             start_block: int = 0,
             end_block: int = None,
     ) -> AsyncIterator[Dict]:
-        if not end_block:
+        if end_block is None:
             end_block = int(await self._client.proxy.block_number(), 16)
 
         if be_polite:
             for sblock, eblock in self._generate_intervals(start_block, end_block, block_limit):
-                result = await self._parse_by_pages(contract_address, sblock, eblock, offset)
+                result = await self._parse_by_pages(
+                    address=address,
+                    contract_address=contract_address,
+                    start_block=sblock,
+                    end_block=eblock,
+                    offset=offset
+                )
                 for t in result:
                     yield t
         else:
             tasks = [
-                self._parse_by_pages(contract_address, sblock, eblock, offset)
+                self._parse_by_pages(
+                    address=address,
+                    contract_address=contract_address,
+                    start_block=sblock,
+                    end_block=eblock,
+                    offset=offset
+                )
                 for sblock, eblock in self._generate_intervals(start_block, end_block, block_limit)
             ]
             result = await asyncio.gather(*tasks)
@@ -39,7 +52,8 @@ class Utils:
 
     async def token_transfers(
             self,
-            contract_address: str,
+            address: str = None,
+            contract_address: str = None,
             be_polite: bool = True,
             block_limit: int = 50,
             offset: int = 3,
@@ -87,11 +101,19 @@ class Utils:
 
         return next((i['from'].lower() for i in response), None)
 
-    async def _parse_by_pages(self, contract_address: str, start_block: int, end_block: int, offset: int) -> List[Dict]:
+    async def _parse_by_pages(
+            self,
+            start_block: int,
+            end_block: int,
+            offset: int,
+            address: str = None,
+            contract_address: str = None,
+    ) -> List[Dict]:
         page, result = 1, []
         while True:
             try:
                 transfers = await self._client.account.token_transfers(
+                    address=address,
                     contract_address=contract_address,
                     start_block=start_block,
                     end_block=end_block,
