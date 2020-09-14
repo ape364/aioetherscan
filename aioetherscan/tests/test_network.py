@@ -52,9 +52,7 @@ def test_init():
     assert n._API_KEY == apikey()
     assert n._loop == myloop
 
-    assert isinstance(n._session, aiohttp.ClientSession)
-    assert n._session.loop == myloop
-
+    assert n._session is None
 
     assert isinstance(n._logger, logging.Logger)
 
@@ -160,10 +158,16 @@ async def test_handle_response(nw):
 
 
 @pytest.mark.asyncio
-async def test_close_session(nw):
+async def test_close_session(nw: Network):
     with patch('aiohttp.ClientSession.close', new_callable=CoroutineMock) as m:
         await nw.close()
-        m.assert_called_once_with()
+        m: CoroutineMock
+        m.assert_not_called()
+
+        nw._session = MagicMock()
+        nw._session.close = CoroutineMock()
+        await nw.close()
+        nw._session.close.assert_called_once()
 
 
 def test_test_network():
