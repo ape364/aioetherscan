@@ -29,12 +29,13 @@ class Network:
         self._set_network(network)
 
         self._loop = loop or asyncio.get_event_loop()
-        self._session = aiohttp.ClientSession(loop=self._loop)
+        self._session = None
 
         self._logger = logging.getLogger(__name__)
 
     async def close(self):
-        await self._session.close()
+        if self._session is not None:
+            await self._session.close()
 
     async def get(self, params: Dict = None) -> Union[Dict, List, str]:
         return await self._request(HttpMethod.GET, params=self._filter_and_sign(params))
@@ -43,6 +44,8 @@ class Network:
         return await self._request(HttpMethod.POST, data=self._filter_and_sign(data))
 
     async def _request(self, method: HttpMethod, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
+        if self._session is None:
+            self._session = aiohttp.ClientSession(loop=self._loop)
         session_method = getattr(self._session, method.value)
         async with session_method(self._API_URL, params=params, data=data) as response:
             self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
