@@ -37,10 +37,6 @@ Supports networks:
 * [Goerli](https://goerli.etherscan.io/)
 * [Tobalaba](https://tobalaba.etherscan.com/)
 
-### Other
-
-* Rate limit is set to 5 requests/sec via [asyncio-throttle](https://github.com/hallazzang/asyncio-throttle)
-
 ## Installation
 
 ```sh
@@ -54,14 +50,20 @@ Register Etherscan account and [create free API key](https://etherscan.io/myapik
 import asyncio
 
 from aioetherscan import Client
+from asyncio_throttle import Throttler
 
 
 async def main():
     c = Client('apikey')
+    throttler = Throttler(rate_limit=5, period=1.0)
     try:
         print(await c.stats.eth_price())
         print(await c.block.block_reward(123456))
-        async for t in c.utils.token_transfers_generator('0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'):
+
+        async for t in c.utils.token_transfers_generator(
+            address='0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
+            throttler=throttler
+        ):
             print(t)
     finally:
         await c.close()

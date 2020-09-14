@@ -6,7 +6,6 @@ from unittest.mock import patch
 import aiohttp
 import asynctest
 import pytest
-from asyncio_throttle import Throttler
 from asynctest import CoroutineMock, MagicMock
 from asynctest import patch
 
@@ -56,8 +55,6 @@ def test_init():
     assert isinstance(n._session, aiohttp.ClientSession)
     assert n._session.loop == myloop
 
-    assert isinstance(n._throttler, Throttler)
-    assert n._throttler.rate_limit == 5
 
     assert isinstance(n._logger, logging.Logger)
 
@@ -118,9 +115,7 @@ async def test_request(nw):
 
     with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
         with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
-            with patch('asyncio_throttle.Throttler.acquire', new=CoroutineMock()) as t:
-                await nw._request(HttpMethod.POST)
-                t.assert_called_once()
+            await nw._request(HttpMethod.POST)
 
 
 # noinspection PyTypeChecker

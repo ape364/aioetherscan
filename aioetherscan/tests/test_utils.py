@@ -2,6 +2,7 @@ from unittest.mock import patch, call
 
 import asynctest
 import pytest
+from asyncio_throttle import Throttler
 from asynctest import CoroutineMock, MagicMock
 
 from aioetherscan import Client
@@ -13,6 +14,12 @@ async def utils():
     c = Client('TestApiKey')
     yield c.utils
     await c.close()
+
+
+@pytest.fixture()
+async def throttler():
+    t = Throttler(rate_limit=5)
+    yield t
 
 
 def test_generate_intervals(utils):
@@ -29,16 +36,18 @@ def test_generate_intervals(utils):
 
 
 @pytest.mark.asyncio
-async def test_parse_by_pages(utils):
+async def test_parse_by_pages(utils, throttler):
     with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
         transfers_mock.side_effect = EtherscanClientApiError('No transactions found', None)
-        await utils._parse_by_pages(
-            100,
-            200,
-            5,
-            address='address',
-            contract_address='contract_address',
-        )
+        async for _ in utils._parse_by_pages(
+                100,
+                200,
+                5,
+                address='address',
+                contract_address='contract_address',
+                throttler=throttler
+        ):
+            break
         transfers_mock.assert_called_once_with(
             address='address',
             contract_address='contract_address',
@@ -50,23 +59,25 @@ async def test_parse_by_pages(utils):
 
 
 @pytest.mark.asyncio
-async def test_parse_by_pages_exception(utils):
+async def test_parse_by_pages_exception(utils, throttler):
     with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
         transfers_mock.side_effect = EtherscanClientApiError('other msg', None)
         try:
-            await utils._parse_by_pages(
-                100,
-                200,
-                5,
-                address='address',
-                contract_address='contract_address',
-            )
+            async for _ in utils._parse_by_pages(
+                    100,
+                    200,
+                    5,
+                    address='address',
+                    contract_address='contract_address',
+                    throttler=throttler
+            ):
+                break
         except EtherscanClientApiError as e:
             assert e.message == 'other msg'
 
 
 @pytest.mark.asyncio
-async def test_parse_by_pages_result(utils):
+async def test_parse_by_pages_result(utils, throttler):
     def token_transfers_side_effect_generator():
         yield [1]
         yield [2]
@@ -80,13 +91,21 @@ async def test_parse_by_pages_result(utils):
 
     with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
         transfers_mock.side_effect = token_transfers_side_effect
-        res = await utils._parse_by_pages(
-            100,
-            200,
-            5,
-            address='address',
-            contract_address='contract_address',
-        )
+
+        i = 0
+        res = []
+        async for transfer in utils._parse_by_pages(
+                100,
+                200,
+                5,
+                address='address',
+                contract_address='contract_address',
+                throttler=throttler
+        ):
+            i += 1
+            if i > 2:
+                break
+            res.append(transfer)
         transfers_mock.assert_has_calls(
             [
                 call(
@@ -134,17 +153,18 @@ async def test_token_transfers(utils):
             block_limit=50,
             offset=3,
             start_block=0,
-            end_block=None
+            end_block=None,
+            throttler=None
         )
 
 
 @pytest.mark.asyncio
-async def test_token_transfers_generator(utils):
-    with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=CoroutineMock()) as parse_mock:
+async def test_token_transfers_generator(utils, throttler):
+    with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=MagicMock()) as parse_mock:
         with patch('aioetherscan.modules.proxy.Proxy.block_number', new=CoroutineMock()) as proxy_mock:
             proxy_mock.return_value = '0x14'
 
-            async for _ in utils.token_transfers_generator(address='addr'):
+            async for _ in utils.token_transfers_generator(address='addr', throttler=throttler):
                 break
 
             parse_mock.assert_called_once_with(
@@ -152,28 +172,16 @@ async def test_token_transfers_generator(utils):
                 contract_address=None,
                 start_block=0,
                 end_block=20,
-                offset=3
+                offset=3,
+                throttler=throttler
             )
 
-    with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=CoroutineMock()) as parse_mock:
-        with patch('aioetherscan.modules.proxy.Proxy.block_number', new=CoroutineMock()) as proxy_mock:
-            with patch('asyncio.gather', new=CoroutineMock()) as asyncio_mock:
-                proxy_mock.return_value = '0x14'
-
-                async for _ in utils.token_transfers_generator(address='addr', be_polite=False):
-                    break
-
-                parse_mock.assert_called_once_with(
-                    address='addr',
-                    contract_address=None,
-                    start_block=0,
-                    end_block=20,
-                    offset=3
-                )
-                asyncio_mock.assert_called_once()
-
-    with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=CoroutineMock()) as parse_mock:
-        async for _ in utils.token_transfers_generator(contract_address='contract_address', end_block=20):
+    with patch('aioetherscan.modules.utils.Utils._parse_by_pages', new=MagicMock()) as parse_mock:
+        async for _ in utils.token_transfers_generator(
+                contract_address='contract_address',
+                end_block=20,
+                throttler=throttler
+        ):
             break
 
         parse_mock.assert_called_once_with(
@@ -181,7 +189,8 @@ async def test_token_transfers_generator(utils):
             contract_address='contract_address',
             start_block=0,
             end_block=20,
-            offset=3
+            offset=3,
+            throttler=throttler
         )
 
 
