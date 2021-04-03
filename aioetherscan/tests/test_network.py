@@ -40,14 +40,14 @@ def apikey():
 
 @pytest.fixture()
 async def nw():
-    nw = Network(apikey(), 'main', get_loop())
+    nw = Network(apikey(), 'eth', 'main', get_loop())
     yield nw
     await nw.close()
 
 
 def test_init():
     myloop = get_loop()
-    n = Network(apikey(), 'main', myloop)
+    n = Network(apikey(), 'eth', 'main', myloop)
 
     assert n._API_KEY == apikey()
     assert n._loop == myloop
@@ -171,10 +171,10 @@ async def test_close_session(nw: Network):
 
 
 def test_test_network():
-    nw = Network(apikey(), 'tobalaba', get_loop())
+    nw = Network(apikey(), 'eth', 'tobalaba', get_loop())
     assert nw._API_URL == 'https://api-tobalaba.etherscan.com/api'
 
 
 def test_invalid_network():
     with pytest.raises(ValueError):
-        Network(apikey(), 'wrong', get_loop())
+        Network(apikey(), 'eth', 'wrong', get_loop())
