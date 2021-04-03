@@ -59,7 +59,7 @@ async def test_close_session(client):
 async def test_networks():
     with patch('aioetherscan.network.Network._set_network') as m:
         c = Client('TestApiKey')
-        m.assert_called_once_with('main')
+        m.assert_called_once_with('eth', 'main')
         await c.close()
 
     with patch('aioetherscan.network.Network._set_network') as m:
