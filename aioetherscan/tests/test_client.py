@@ -63,7 +63,7 @@ async def test_networks():
         await c.close()
 
     with patch('aioetherscan.network.Network._set_network') as m:
-        c = Client('TestApiKey', 'kovan')
+        c = Client('TestApiKey', 'eth', 'kovan')
         m.assert_called_once_with('eth', 'kovan')
         await c.close()
 #
