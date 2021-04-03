@@ -15,7 +15,8 @@ class HttpMethod(Enum):
 
 
 class Network:
-    _NETWORKS = {
+    _API_KINDS = ('eth', 'bsc')
+    _ETH_NETWORKS = {
         'main': 'https://api.etherscan.io/api',
         'ropsten': 'https://api-ropsten.etherscan.io/api',  # ROPSTEN (Revival) TESTNET
         'kovan': 'https://api-kovan.etherscan.io/api',  # KOVAN (POA) TESTNET
@@ -24,9 +25,14 @@ class Network:
         'tobalaba': 'https://api-tobalaba.etherscan.com/api'  # TOBALABA NETWORK
     }
 
-    def __init__(self, api_key: str, network: str, loop: asyncio.AbstractEventLoop) -> None:
+    _BSC_NETWORKS = {
+        'main': 'https://api.bscscan.com/api',
+        'test': 'https://api-testnet.bscscan.com/api',
+    }
+
+    def __init__(self, api_key: str, api_kind: str, network: str, loop: asyncio.AbstractEventLoop) -> None:
         self._API_KEY = api_key
-        self._set_network(network)
+        self._set_network(api_kind, network)
 
         self._loop = loop or asyncio.get_event_loop()
         self._session = None
@@ -89,7 +95,16 @@ class Network:
     def _filter_params(params: Dict) -> Dict:
         return {k: v for k, v in params.items() if v is not None}
 
-    def _set_network(self, network: str) -> None:
-        if network not in self._NETWORKS:
-            raise ValueError(f'Incorrect network {network!r}, supported only: {", ".join(self._NETWORKS.keys())}')
-        self._API_URL = self._NETWORKS[network]
+    def _set_network(self, api_kind: str, network: str) -> None:
+        kind = api_kind.lower().strip()
+
+        if kind == 'eth':
+            networks = self._ETH_NETWORKS
+        elif kind == 'bsc':
+            networks = self._BSC_NETWORKS
+        else:
+            raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
+
+        if network not in networks:
+            raise ValueError(f'Incorrect network {network!r}, supported only: {", ".join(networks.keys())}')
+        self._API_URL = networks[network]
