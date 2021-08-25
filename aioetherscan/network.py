@@ -1,9 +1,12 @@
 import asyncio
 import logging
+from asyncio import AbstractEventLoop
 from enum import Enum
 from typing import Union, Dict, List
 
 import aiohttp
+from aiohttp import ClientTimeout
+from aiohttp.client import DEFAULT_TIMEOUT
 
 from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
     EtherscanClientProxyError
@@ -30,11 +33,14 @@ class Network:
         'test': 'https://api-testnet.bscscan.com/api',
     }
 
-    def __init__(self, api_key: str, api_kind: str, network: str, loop: asyncio.AbstractEventLoop) -> None:
+    def __init__(self, api_key: str, api_kind: str, network: str,
+                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None) -> None:
         self._API_KEY = api_key
         self._set_network(api_kind, network)
 
         self._loop = loop or asyncio.get_event_loop()
+        self._timeout = timeout
+
         self._session = None
 
         self._logger = logging.getLogger(__name__)
@@ -50,8 +56,10 @@ class Network:
         return await self._request(HttpMethod.POST, data=self._filter_and_sign(data))
 
     async def _request(self, method: HttpMethod, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
+        if self._timeout is None:
+            self._timeout = DEFAULT_TIMEOUT
         if self._session is None:
-            self._session = aiohttp.ClientSession(loop=self._loop)
+            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout)
         session_method = getattr(self._session, method.value)
         async with session_method(self._API_URL, params=params, data=data) as response:
             self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
