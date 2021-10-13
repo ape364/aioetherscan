@@ -61,9 +61,9 @@ class Network:
         if self._timeout is None:
             self._timeout = DEFAULT_TIMEOUT
         if self._session is None:
-            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout, proxy=self._proxy)
+            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout)
         session_method = getattr(self._session, method.value)
-        async with session_method(self._API_URL, params=params, data=data) as response:
+        async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
             self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
             return await self._handle_response(response)
 
