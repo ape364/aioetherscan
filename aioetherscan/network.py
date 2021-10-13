@@ -34,7 +34,7 @@ class Network:
     }
 
     def __init__(self, api_key: str, api_kind: str, network: str,
-                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None) -> None:
+                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None, proxy: str = None) -> None:
         self._API_KEY = api_key
         self._set_network(api_kind, network)
 
@@ -42,6 +42,8 @@ class Network:
         self._timeout = timeout
 
         self._session = None
+
+        self._proxy = proxy
 
         self._logger = logging.getLogger(__name__)
 
@@ -59,7 +61,7 @@ class Network:
         if self._timeout is None:
             self._timeout = DEFAULT_TIMEOUT
         if self._session is None:
-            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout)
+            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout, proxy=self._proxy)
         session_method = getattr(self._session, method.value)
         async with session_method(self._API_URL, params=params, data=data) as response:
             self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
