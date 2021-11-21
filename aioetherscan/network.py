@@ -18,7 +18,7 @@ class HttpMethod(Enum):
 
 
 class Network:
-    _API_KINDS = ('eth', 'bsc')
+    _API_KINDS = ('eth', 'bsc', 'avax')
     _ETH_NETWORKS = {
         'main': 'https://api.etherscan.io/api',
         'ropsten': 'https://api-ropsten.etherscan.io/api',  # ROPSTEN (Revival) TESTNET
@@ -31,6 +31,11 @@ class Network:
     _BSC_NETWORKS = {
         'main': 'https://api.bscscan.com/api',
         'test': 'https://api-testnet.bscscan.com/api',
+    }
+
+    _AVAX_NETWORKS = {
+        'main': 'https://api.snowtrace.io/api',
+        'test': 'https://api-testnet.snowtrace.io/api',
     }
 
     def __init__(self, api_key: str, api_kind: str, network: str,
@@ -112,6 +117,8 @@ class Network:
             networks = self._ETH_NETWORKS
         elif kind == 'bsc':
             networks = self._BSC_NETWORKS
+        elif kind == 'avax':
+            networks = self._AVAX_NETWORKS
         else:
             raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
 

@@ -102,13 +102,13 @@ async def test_request(nw):
     with asynctest.mock.patch('aiohttp.ClientSession.get', new_callable=MagicMockContext) as m:
         with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
             await nw._request(HttpMethod.GET)
-            m.assert_called_once_with('https://api.etherscan.io/api', data=None, params=None)
+            m.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
             h.assert_called_once()
 
     with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
         with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
             await nw._request(HttpMethod.POST)
-            m.assert_called_once_with('https://api.etherscan.io/api', data=None, params=None)
+            m.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
             h.assert_called_once()
 
     with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
