@@ -12,11 +12,12 @@ aiohttp = "^3.4"
 asyncio_throttle = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^4.0"
-pytest-asyncio = "^0.10.0"
+pytest = "^7.1.2"
+pytest-asyncio = "^0.18.3"
 asynctest = "^0.13.0"
-coveralls = "^1.5"
-twine = "^1.13"
+coveralls = "^3.3.1"
+twine = "^4.0.1"
+
 
 [build-system]
 requires = ["poetry>=0.12"]
