@@ -1,4 +1,5 @@
 from typing import Tuple, Dict, List, Iterator, AsyncIterator, Optional
+from urllib.parse import urljoin, urlencode
 
 from asyncio_throttle import Throttler
 
@@ -8,8 +9,9 @@ from aioetherscan.exceptions import EtherscanClientApiError
 class Utils:
     """Helper methods which use the combination of documented APIs."""
 
-    def __init__(self, client):
+    def __init__(self, client, base_url):
         self._client = client
+        self._BASE_URL = base_url
 
     async def token_transfers_generator(
             self,
@@ -125,3 +127,15 @@ class Utils:
     def _generate_intervals(from_number: int, to_number: int, count: int) -> Iterator[Tuple[int, int]]:
         for i in range(from_number, to_number + 1, count):
             yield (i, min(i + count - 1, to_number))
+
+    def get_address_link(self, address: str) -> str:
+        return urljoin(self._BASE_URL, f'address/{address}')
+
+    def get_tx_link(self, tx_hash: str) -> str:
+        return urljoin(self._BASE_URL, f'tx/{tx_hash}')
+
+    def get_block_link(self, block_number: int) -> str:
+        return urljoin(self._BASE_URL, f'block/{block_number}')
+
+    def get_block_txs_link(self, block_number: int) -> str:
+        return urljoin(self._BASE_URL, f'txs?{urlencode({"block": block_number})}')

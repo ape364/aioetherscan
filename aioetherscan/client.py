@@ -26,7 +26,7 @@ class Client:
         self.logs = Logs(self)
         self.proxy = Proxy(self)
 
-        self.utils = Utils(self)
+        self.utils = Utils(self, self._http.BASE_URL)
 
     async def close(self):
         await self._http.close()

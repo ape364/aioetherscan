@@ -3,6 +3,7 @@ import logging
 from asyncio import AbstractEventLoop
 from enum import Enum
 from typing import Union, Dict, List
+from urllib.parse import urlunsplit
 
 import aiohttp
 from aiohttp import ClientTimeout
@@ -18,25 +19,12 @@ class HttpMethod(Enum):
 
 
 class Network:
-    _API_KINDS = ('eth', 'bsc', 'avax')
-    _ETH_NETWORKS = {
-        'main': 'https://api.etherscan.io/api',
-        'ropsten': 'https://api-ropsten.etherscan.io/api',  # ROPSTEN (Revival) TESTNET
-        'kovan': 'https://api-kovan.etherscan.io/api',  # KOVAN (POA) TESTNET
-        'rinkeby': 'https://api-rinkeby.etherscan.io/api',  # RINKEBY (CLIQUE) TESTNET
-        'goerli': 'https://api-goerli.etherscan.io/api',  # GOERLI (GTH) TESTNET
-        'tobalaba': 'https://api-tobalaba.etherscan.com/api'  # TOBALABA NETWORK
+    _API_KINDS = {
+        'eth': 'etherscan.io',
+        'bsc': 'bscscan.com',
+        'avax': 'snowtrace.io'
     }
-
-    _BSC_NETWORKS = {
-        'main': 'https://api.bscscan.com/api',
-        'test': 'https://api-testnet.bscscan.com/api',
-    }
-
-    _AVAX_NETWORKS = {
-        'main': 'https://api.snowtrace.io/api',
-        'test': 'https://api-testnet.snowtrace.io/api',
-    }
+    BASE_URL: str = None
 
     def __init__(self, api_key: str, api_kind: str, network: str,
                  loop: AbstractEventLoop = None, timeout: ClientTimeout = None, proxy: str = None) -> None:
@@ -110,18 +98,14 @@ class Network:
     def _filter_params(params: Dict) -> Dict:
         return {k: v for k, v in params.items() if v is not None}
 
-    def _set_network(self, api_kind: str, network: str) -> None:
-        kind = api_kind.lower().strip()
-
-        if kind == 'eth':
-            networks = self._ETH_NETWORKS
-        elif kind == 'bsc':
-            networks = self._BSC_NETWORKS
-        elif kind == 'avax':
-            networks = self._AVAX_NETWORKS
-        else:
+    def _set_network(self, api_kind: str, network: str, scheme: str = 'https', path: str = 'api') -> None:
+        # https://docs.etherscan.io/getting-started/endpoint-urls
+        try:
+            base_netloc = self._API_KINDS[api_kind.lower().strip()]
+        except KeyError:
             raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
 
-        if network not in networks:
-            raise ValueError(f'Incorrect network {network!r}, supported only: {", ".join(networks.keys())}')
-        self._API_URL = networks[network]
+        network_name = network.lower().strip()
+        prefix = 'api' if network_name == 'main' else f'api-{network_name}'
+        self.BASE_URL = urlunsplit((scheme, base_netloc, '', '', ''))
+        self._API_URL = urlunsplit((scheme, f'{prefix}.{base_netloc}', path, '', ''))

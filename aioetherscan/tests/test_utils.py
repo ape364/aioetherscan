@@ -17,6 +17,20 @@ async def utils():
 
 
 @pytest.fixture()
+async def utils_bsc():
+    c = Client('TestApiKey', api_kind='bsc')
+    yield c.utils
+    await c.close()
+
+
+@pytest.fixture()
+async def utils_bsc_testnet():
+    c = Client('TestApiKey', api_kind='bsc', network='testnet')
+    yield c.utils
+    await c.close()
+
+
+@pytest.fixture()
 async def throttler():
     t = Throttler(rate_limit=5)
     yield t
@@ -219,3 +233,55 @@ async def test_get_contract_creator(utils):
             page=1,
             offset=1
         )
+
+
+@pytest.mark.parametrize(
+    "fixture_name,address,expected",
+    [
+        ('utils', 'qwe', 'https://etherscan.io/address/qwe'),
+        ('utils_bsc', 'qwe', 'https://bscscan.com/address/qwe'),
+        ('utils_bsc_testnet', 'qwe', 'https://bscscan.com/address/qwe'),
+    ]
+)
+def test_get_address_link(fixture_name, address, expected, request):
+    fixture = request.getfixturevalue(fixture_name)
+    assert fixture.get_address_link(address) == expected
+
+
+@pytest.mark.parametrize(
+    "fixture_name,tx_hash,expected",
+    [
+        ('utils', 'qwe', 'https://etherscan.io/tx/qwe'),
+        ('utils_bsc', 'qwe', 'https://bscscan.com/tx/qwe'),
+        ('utils_bsc_testnet', 'qwe', 'https://bscscan.com/tx/qwe'),
+    ]
+)
+def test_get_tx_link(fixture_name, tx_hash, expected, request):
+    fixture = request.getfixturevalue(fixture_name)
+    assert fixture.get_tx_link(tx_hash) == expected
+
+
+@pytest.mark.parametrize(
+    "fixture_name,block_number,expected",
+    [
+        ('utils', 123456, 'https://etherscan.io/block/123456'),
+        ('utils_bsc', 241234, 'https://bscscan.com/block/241234'),
+        ('utils_bsc_testnet', 657465, 'https://bscscan.com/block/657465'),
+    ]
+)
+def test_get_block_link(fixture_name, block_number, expected, request):
+    fixture = request.getfixturevalue(fixture_name)
+    assert fixture.get_block_link(block_number) == expected
+
+
+@pytest.mark.parametrize(
+    "fixture_name,block_number,expected",
+    [
+        ('utils', 123456, 'https://etherscan.io/txs?block=123456'),
+        ('utils_bsc', 241234, 'https://bscscan.com/txs?block=241234'),
+        ('utils_bsc_testnet', 657465, 'https://bscscan.com/txs?block=657465'),
+    ]
+)
+def test_get_block_txs_link(fixture_name, block_number, expected, request):
+    fixture = request.getfixturevalue(fixture_name)
+    assert fixture.get_block_txs_link(block_number) == expected

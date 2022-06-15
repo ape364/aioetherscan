@@ -170,11 +170,20 @@ async def test_close_session(nw: Network):
         nw._session.close.assert_called_once()
 
 
-def test_test_network():
-    nw = Network(apikey(), 'eth', 'tobalaba', get_loop())
-    assert nw._API_URL == 'https://api-tobalaba.etherscan.com/api'
+@pytest.mark.parametrize(
+    "api_kind, network_name,expected", [
+        ('eth', 'main', 'https://api.etherscan.io/api'),
+        ('eth', 'kovan', 'https://api-kovan.etherscan.io/api'),
+        ('bsc', 'main', 'https://api.bscscan.com/api'),
+        ('bsc', 'testnet', 'https://api-testnet.bscscan.com/api'),
+    ]
+)
+def test_test_network(api_kind, network_name, expected):
+    nw = Network(apikey(), api_kind, network_name, get_loop())
+    assert nw._API_URL == expected
 
 
-def test_invalid_network():
-    with pytest.raises(ValueError):
-        Network(apikey(), 'eth', 'wrong', get_loop())
+def test_invalid_api_kind():
+    with pytest.raises(ValueError) as excinfo:
+        Network(apikey(), 'wrong', 'main', get_loop())
+    assert 'Incorrect api_kind' in str(excinfo.value)
