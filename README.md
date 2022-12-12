@@ -7,7 +7,7 @@
 [![Versions](https://img.shields.io/pypi/pyversions/aioetherscan.svg)](https://pypi.org/project/aioetherscan/)
 
 
-[Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper. Tested with Python 3.7 & 3.8.
+[Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper. Tested with Python 3.10.
 
 ## Features
 
@@ -26,16 +26,16 @@ Supports all API modules:
 
 Also provides 3rd party `utils` module, which allows to fetch a lot of transactions without timeouts and not getting banned.
 
-### Networks
+### Blockchains
 
-Supports networks:
+Supports blockchain explorers:
 
-* [Main](https://etherscan.io/)
-* [Ropsten](https://ropsten.etherscan.io/)
-* [Kovan](https://kovan.etherscan.io/)
-* [Rinkeby](https://rinkeby.etherscan.io/)
-* [Goerli](https://goerli.etherscan.io/)
-* [Tobalaba](https://tobalaba.etherscan.com/)
+* [Etherscan](https://docs.etherscan.io/getting-started/endpoint-urls)
+* [BscScan](https://docs.bscscan.com/getting-started/endpoint-urls)
+* [SnowTrace](https://docs.snowtrace.io/getting-started/endpoint-urls)
+* [PolygonScan](https://docs.polygonscan.com/getting-started/endpoint-urls)
+* [Optimism](https://docs.optimism.etherscan.io/getting-started/endpoint-urls)
+* [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
 
 ## Installation
 

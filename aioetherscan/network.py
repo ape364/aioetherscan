@@ -22,7 +22,10 @@ class Network:
     _API_KINDS = {
         'eth': 'etherscan.io',
         'bsc': 'bscscan.com',
-        'avax': 'snowtrace.io'
+        'avax': 'snowtrace.io',
+        'polygon': 'polygonscan.com',
+        'optimism': 'etherscan.io',
+        'arbitrum': 'arbiscan.io',
     }
     BASE_URL: str = None
 
@@ -106,6 +109,9 @@ class Network:
             raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
 
         network_name = network.lower().strip()
-        prefix = 'api' if network_name == 'main' else f'api-{network_name}'
+        if api_kind == 'optimism':
+            prefix = 'api-optimistic' if network_name == 'main' else f'api-{network_name}-optimistic'
+        else:
+            prefix = 'api' if network_name == 'main' else f'api-{network_name}'
         self.BASE_URL = urlunsplit((scheme, base_netloc, '', '', ''))
         self._API_URL = urlunsplit((scheme, f'{prefix}.{base_netloc}', path, '', ''))
