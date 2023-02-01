@@ -170,10 +170,31 @@ async def test_close_session(nw: Network):
         nw._session.close.assert_called_once()
 
 
+# @pytest.mark.parametrize(
+#     "api_kind, network_name, expected", [
+#         ('eth', 'main', 'https://api.etherscan.io/api'),
+#         ('eth', 'kovan', 'https://api-kovan.etherscan.io/api'),
+#         ('bsc', 'main', 'https://api.bscscan.com/api'),
+#         ('bsc', 'testnet', 'https://api-testnet.bscscan.com/api'),
+#         ('avax', 'main', 'https://api.snowtrace.io/api'),
+#         ('avax', 'testnet', 'https://api-testnet.snowtrace.io/api'),
+#         ('polygon', 'main', 'https://api.polygonscan.com/api'),
+#         ('polygon', 'testnet', 'https://api-testnet.polygonscan.com/api'),
+#         ('optimism', 'main', 'https://api-optimistic.etherscan.io/api'),
+#         ('optimism', 'testnet', 'https://api-testnet-optimistic.etherscan.io/api'),
+#         ('arbitrum', 'main', 'https://api.arbiscan.io/api'),
+#         ('arbitrum', 'testnet', 'https://api-testnet.arbiscan.io/api'),
+#     ]
+# )
 @pytest.mark.parametrize(
-    "api_kind, network_name, expected", [
+    "api_kind,network_name,expected",
+    [
         ('eth', 'main', 'https://api.etherscan.io/api'),
+        ('eth', 'ropsten', 'https://api-ropsten.etherscan.io/api'),
         ('eth', 'kovan', 'https://api-kovan.etherscan.io/api'),
+        ('eth', 'rinkeby', 'https://api-rinkeby.etherscan.io/api'),
+        ('eth', 'goerli', 'https://api-goerli.etherscan.io/api'),
+        ('eth', 'sepolia', 'https://api-sepolia.etherscan.io/api'),
         ('bsc', 'main', 'https://api.bscscan.com/api'),
         ('bsc', 'testnet', 'https://api-testnet.bscscan.com/api'),
         ('avax', 'main', 'https://api.snowtrace.io/api'),
@@ -181,9 +202,10 @@ async def test_close_session(nw: Network):
         ('polygon', 'main', 'https://api.polygonscan.com/api'),
         ('polygon', 'testnet', 'https://api-testnet.polygonscan.com/api'),
         ('optimism', 'main', 'https://api-optimistic.etherscan.io/api'),
-        ('optimism', 'testnet', 'https://api-testnet-optimistic.etherscan.io/api'),
+        ('optimism', 'goerli', 'https://api-goerli-optimistic.etherscan.io/api'),
         ('arbitrum', 'main', 'https://api.arbiscan.io/api'),
-        ('arbitrum', 'testnet', 'https://api-testnet.arbiscan.io/api'),
+        ('arbitrum', 'nova', 'https://api-nova.arbiscan.io/api'),
+        ('arbitrum', 'goerli', 'https://api-goerli.arbiscan.io/api'),
     ]
 )
 def test_test_network(api_kind, network_name, expected):

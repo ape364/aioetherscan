@@ -102,16 +102,38 @@ class Network:
         return {k: v for k, v in params.items() if v is not None}
 
     def _set_network(self, api_kind: str, network: str, scheme: str = 'https', path: str = 'api') -> None:
-        # https://docs.etherscan.io/getting-started/endpoint-urls
         try:
             base_netloc = self._API_KINDS[api_kind.lower().strip()]
         except KeyError:
             raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
-
-        network_name = network.lower().strip()
-        if api_kind == 'optimism':
-            prefix = 'api-optimistic' if network_name == 'main' else f'api-{network_name}-optimistic'
         else:
-            prefix = 'api' if network_name == 'main' else f'api-{network_name}'
-        self.BASE_URL = urlunsplit((scheme, base_netloc, '', '', ''))
-        self._API_URL = urlunsplit((scheme, f'{prefix}.{base_netloc}', path, '', ''))
+            self._API_KIND = api_kind.lower().strip()
+            self._NETWORK = network.lower().strip()
+
+            self._API_URL = self._get_api_url(base_netloc, scheme, path)
+            self.BASE_URL = self._get_base_url(base_netloc, scheme)
+
+    def _get_api_url(self, base_netloc: str, scheme: str, path: str) -> str:
+        is_main = self._NETWORK == 'main'
+
+        if self._API_KIND == 'optimism':
+            prefix = 'api-optimistic' if is_main else f'api-{self._NETWORK}-optimistic'
+        else:
+            prefix = 'api' if is_main else f'api-{self._NETWORK}'
+
+        return urlunsplit((scheme, f'{prefix}.{base_netloc}', path, '', ''))
+
+    def _get_base_url(self, base_netloc: str, scheme: str) -> str:
+        if self._API_KIND == 'polygon' and self._NETWORK == 'testnet':
+            network = 'mumbai'
+        else:
+            network = self._NETWORK
+
+        is_main = network == 'main'
+
+        if self._API_KIND == 'optimism':
+            prefix = 'optimistic' if is_main else f'{network}-optimism'
+        else:
+            prefix = None if is_main else network
+
+        return urlunsplit((scheme, base_netloc if prefix is None else f'{prefix}.{base_netloc}', '', '', ''))
