@@ -190,6 +190,8 @@ async def test_close_session(nw: Network):
         ('arbitrum', 'main', 'https://api.arbiscan.io/api'),
         ('arbitrum', 'nova', 'https://api-nova.arbiscan.io/api'),
         ('arbitrum', 'goerli', 'https://api-goerli.arbiscan.io/api'),
+        ('fantom', 'main', 'https://api.ftmscan.com/api'),
+        ('fantom', 'testnet', 'https://api-testnet.ftmscan.com/api'),
     ]
 )
 def test_test_network(api_kind, network_name, expected):

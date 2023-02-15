@@ -36,6 +36,7 @@ Supports blockchain explorers:
 * [PolygonScan](https://docs.polygonscan.com/getting-started/endpoint-urls)
 * [Optimism](https://docs.optimism.etherscan.io/getting-started/endpoint-urls)
 * [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
+* [FtmScan](https://docs.ftmscan.com/getting-started/endpoint-urls)
 
 ## Installation
 
