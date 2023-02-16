@@ -241,6 +241,8 @@ async def test_get_contract_creator(utils):
         ('arbitrum', 'main', 'qwe', 'https://arbiscan.io/address/qwe'),
         ('arbitrum', 'nova', 'qwe', 'https://nova.arbiscan.io/address/qwe'),
         ('arbitrum', 'goerli', 'qwe', 'https://goerli.arbiscan.io/address/qwe'),
+        ('fantom', 'main', 'qwe', 'https://ftmscan.com/address/qwe'),
+        ('fantom', 'testnet', 'qwe', 'https://testnet.ftmscan.com/address/qwe'),
     ]
 )
 def test_get_address_link(api_kind, network_name, address, expected):
@@ -268,6 +270,8 @@ def test_get_address_link(api_kind, network_name, address, expected):
         ('arbitrum', 'main', 'qwe', 'https://arbiscan.io/tx/qwe'),
         ('arbitrum', 'nova', 'qwe', 'https://nova.arbiscan.io/tx/qwe'),
         ('arbitrum', 'goerli', 'qwe', 'https://goerli.arbiscan.io/tx/qwe'),
+        ('fantom', 'main', 'qwe', 'https://ftmscan.com/tx/qwe'),
+        ('fantom', 'testnet', 'qwe', 'https://testnet.ftmscan.com/tx/qwe'),
     ]
 )
 def test_get_tx_link(api_kind, network_name, tx_hash, expected):
@@ -295,6 +299,8 @@ def test_get_tx_link(api_kind, network_name, tx_hash, expected):
         ('arbitrum', 'main', 'qwe', 'https://arbiscan.io/block/qwe'),
         ('arbitrum', 'nova', 'qwe', 'https://nova.arbiscan.io/block/qwe'),
         ('arbitrum', 'goerli', 'qwe', 'https://goerli.arbiscan.io/block/qwe'),
+        ('fantom', 'main', 'qwe', 'https://ftmscan.com/block/qwe'),
+        ('fantom', 'testnet', 'qwe', 'https://testnet.ftmscan.com/block/qwe'),
     ]
 )
 def test_get_block_link(api_kind, network_name, block_number, expected):
@@ -322,6 +328,8 @@ def test_get_block_link(api_kind, network_name, block_number, expected):
         ('arbitrum', 'main', 'qwe', 'https://arbiscan.io/txs?block=qwe'),
         ('arbitrum', 'nova', 'qwe', 'https://nova.arbiscan.io/txs?block=qwe'),
         ('arbitrum', 'goerli', 'qwe', 'https://goerli.arbiscan.io/txs?block=qwe'),
+        ('fantom', 'main', 'qwe', 'https://ftmscan.com/txs?block=qwe'),
+        ('fantom', 'testnet', 'qwe', 'https://testnet.ftmscan.com/txs?block=qwe'),
     ]
 )
 def test_get_block_txs_link(api_kind, network_name, block_number, expected):
