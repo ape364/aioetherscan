@@ -7,6 +7,7 @@ from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
+from aioetherscan.modules.proxy_utils import AccountProxy
 from aioetherscan.modules.stats import Stats
 from aioetherscan.modules.transaction import Transaction
 from aioetherscan.modules.utils import Utils
@@ -26,7 +27,8 @@ class Client:
         self.logs = Logs(self)
         self.proxy = Proxy(self)
 
-        self.utils = Utils(self, self._http.BASE_URL)
+        self.utils = Utils(self)
+        self.account_proxy = AccountProxy(self)
 
     async def close(self):
         await self._http.close()
