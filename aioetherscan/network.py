@@ -2,12 +2,13 @@ import asyncio
 import logging
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Union, Dict, List
+from typing import Union, Dict, List, AsyncContextManager
 from urllib.parse import urlunsplit
 
 import aiohttp
 from aiohttp import ClientTimeout
 from aiohttp.client import DEFAULT_TIMEOUT
+from asyncio_throttle import Throttler
 
 from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
     EtherscanClientProxyError
@@ -31,7 +32,8 @@ class Network:
     BASE_URL: str = None
 
     def __init__(self, api_key: str, api_kind: str, network: str,
-                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None, proxy: str = None) -> None:
+                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None,
+                 proxy: str = None, throttler: AsyncContextManager = None) -> None:
         self._API_KEY = api_key
         self._set_network(api_kind, network)
 
@@ -41,6 +43,9 @@ class Network:
         self._session = None
 
         self._proxy = proxy
+
+        # Defaulting to free API key rate limit
+        self._throttler = throttler or Throttler(rate_limit=5, period=1.0)
 
         self._logger = logging.getLogger(__name__)
 
@@ -60,9 +65,10 @@ class Network:
         if self._session is None:
             self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout)
         session_method = getattr(self._session, method.value)
-        async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
-            self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
-            return await self._handle_response(response)
+        async with self._throttler:
+            async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
+                self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
+                return await self._handle_response(response)
 
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Union[Dict, list, str]:
         try:

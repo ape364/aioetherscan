@@ -1,8 +1,6 @@
 from itertools import tee, count
 from typing import TypeVar, Union, List, Tuple, Iterator, Callable, Awaitable, Iterable, AsyncIterator, Any
 
-from asyncio_throttle import Throttler
-
 from aioetherscan.exceptions import EtherscanClientApiError
 
 T = TypeVar("T")
@@ -14,17 +12,6 @@ class BaseProxy:
 
     def __init__(self, client):
         self._client = client
-        # Defaulting to free API key rate limit
-        self._throttler = Throttler(rate_limit=5, period=1.0)
-
-    @property
-    def throttler(self) -> Throttler:
-        return self._throttler
-
-    @throttler.setter
-    def throttler(self, value: Throttler):
-        if isinstance(value, Throttler):
-            self._throttler = value
 
     @staticmethod
     def generate_intervals(from_number: int, to_number: int, count_: int) -> Iterator[Tuple[int, int]]:
@@ -34,8 +21,7 @@ class BaseProxy:
     def proxy(self, func: Callable[..., Awaitable[Iterable[T]]]):
 
         async def wrapper(*args, **kwargs) -> AsyncIterator[T]:
-            async with self.throttler:
-                result = await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
             for v in result:
                 yield v
 
