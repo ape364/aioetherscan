@@ -2,12 +2,14 @@ import asyncio
 import logging
 from asyncio import AbstractEventLoop
 from enum import Enum
-from typing import Union, Dict, List
+from typing import Union, Dict, List, AsyncContextManager, Optional
 from urllib.parse import urlunsplit
 
 import aiohttp
 from aiohttp import ClientTimeout
-from aiohttp.client import DEFAULT_TIMEOUT
+from aiohttp.client import ClientSession
+from aiohttp_retry import RetryOptionsBase, RetryClient
+from asyncio_throttle import Throttler
 
 from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
     EtherscanClientProxyError
@@ -31,22 +33,27 @@ class Network:
     BASE_URL: str = None
 
     def __init__(self, api_key: str, api_kind: str, network: str,
-                 loop: AbstractEventLoop = None, timeout: ClientTimeout = None, proxy: str = None) -> None:
+                 loop: Optional[AbstractEventLoop], timeout: Optional[ClientTimeout], proxy: Optional[str],
+                 throttler: Optional[AsyncContextManager], retry_options: Optional[RetryOptionsBase]) -> None:
         self._API_KEY = api_key
         self._set_network(api_kind, network)
 
         self._loop = loop or asyncio.get_event_loop()
         self._timeout = timeout
 
-        self._session = None
-
         self._proxy = proxy
+
+        # Defaulting to free API key rate limit
+        self._throttler = throttler or Throttler(rate_limit=5, period=1.0)
+
+        self._retry_client = None
+        self._retry_options = retry_options
 
         self._logger = logging.getLogger(__name__)
 
     async def close(self):
-        if self._session is not None:
-            await self._session.close()
+        if self._retry_client is not None:
+            await self._retry_client.close()
 
     async def get(self, params: Dict = None) -> Union[Dict, List, str]:
         return await self._request(HttpMethod.GET, params=self._filter_and_sign(params))
@@ -54,15 +61,20 @@ class Network:
     async def post(self, data: Dict = None) -> Union[Dict, List, str]:
         return await self._request(HttpMethod.POST, data=self._filter_and_sign(data))
 
+    def _get_retry_client(self) -> RetryClient:
+        return RetryClient(
+            client_session=ClientSession(loop=self._loop, timeout=self._timeout),
+            retry_options=self._retry_options
+        )
+
     async def _request(self, method: HttpMethod, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
-        if self._timeout is None:
-            self._timeout = DEFAULT_TIMEOUT
-        if self._session is None:
-            self._session = aiohttp.ClientSession(loop=self._loop, timeout=self._timeout)
-        session_method = getattr(self._session, method.value)
-        async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
-            self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
-            return await self._handle_response(response)
+        if self._retry_client is None:
+            self._retry_client = self._get_retry_client()
+        session_method = getattr(self._retry_client, method.value)
+        async with self._throttler:
+            async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
+                self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
+                return await self._handle_response(response)
 
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Union[Dict, list, str]:
         try:

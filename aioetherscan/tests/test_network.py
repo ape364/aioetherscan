@@ -1,11 +1,13 @@
 import asyncio
 import json
 import logging
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import aiohttp
-import asynctest
 import pytest
+from aiohttp import ClientTimeout
+from aiohttp_retry import ExponentialRetry
+from asyncio_throttle import Throttler
 from asynctest import CoroutineMock, MagicMock
 from asynctest import patch
 
@@ -40,19 +42,27 @@ def apikey():
 
 @pytest.fixture()
 async def nw():
-    nw = Network(apikey(), 'eth', 'main', get_loop())
+    nw = Network(apikey(), 'eth', 'main', get_loop(), None, None, None, None)
     yield nw
     await nw.close()
 
 
 def test_init():
     myloop = get_loop()
-    n = Network(apikey(), 'eth', 'main', myloop)
+    proxy = 'qwe'
+    timeout = ClientTimeout(5)
+    throttler = Throttler(1)
+    retry_options = ExponentialRetry()
+    n = Network(apikey(), 'eth', 'main', myloop, timeout, proxy, throttler, retry_options)
 
     assert n._API_KEY == apikey()
     assert n._loop == myloop
+    assert n._timeout is timeout
+    assert n._proxy is proxy
+    assert n._throttler is throttler
 
-    assert n._session is None
+    assert n._retry_options is retry_options
+    assert n._retry_client is None
 
     assert isinstance(n._logger, logging.Logger)
 
@@ -99,21 +109,29 @@ async def test_request(nw):
             type(self).__aenter__ = CoroutineMock(return_value=MagicMock())
             type(self).__aexit__ = CoroutineMock(return_value=MagicMock())
 
-    with asynctest.mock.patch('aiohttp.ClientSession.get', new_callable=MagicMockContext) as m:
-        with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
-            await nw._request(HttpMethod.GET)
-            m.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
-            h.assert_called_once()
+    nw._retry_client = AsyncMock()
 
-    with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
-        with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
-            await nw._request(HttpMethod.POST)
-            m.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
-            h.assert_called_once()
+    throttler_mock = AsyncMock()
+    nw._throttler = AsyncMock()
+    nw._throttler.__aenter__ = throttler_mock
 
-    with asynctest.mock.patch('aiohttp.ClientSession.post', new_callable=MagicMockContext) as m:
-        with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
-            await nw._request(HttpMethod.POST)
+    get_mock = MagicMockContext()
+    nw._retry_client.get = get_mock
+    with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
+        await nw._request(HttpMethod.GET)
+        throttler_mock.assert_awaited_once()
+        get_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        h.assert_called_once()
+
+    post_mock = MagicMockContext()
+    nw._retry_client.post = post_mock
+    with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
+        await nw._request(HttpMethod.POST)
+        throttler_mock.assert_awaited()
+        post_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        h.assert_called_once()
+
+    assert throttler_mock.call_count == 2
 
 
 # noinspection PyTypeChecker
@@ -164,10 +182,10 @@ async def test_close_session(nw: Network):
         m: CoroutineMock
         m.assert_not_called()
 
-        nw._session = MagicMock()
-        nw._session.close = CoroutineMock()
+        nw._retry_client = MagicMock()
+        nw._retry_client.close = CoroutineMock()
         await nw.close()
-        nw._session.close.assert_called_once()
+        nw._retry_client.close.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -195,11 +213,11 @@ async def test_close_session(nw: Network):
     ]
 )
 def test_test_network(api_kind, network_name, expected):
-    nw = Network(apikey(), api_kind, network_name, get_loop())
+    nw = Network(apikey(), api_kind, network_name, None, None, None, None, None)
     assert nw._API_URL == expected
 
 
 def test_invalid_api_kind():
     with pytest.raises(ValueError) as excinfo:
-        Network(apikey(), 'wrong', 'main', get_loop())
+        Network(apikey(), 'wrong', 'main', None, None, None, None, None)
     assert 'Incorrect api_kind' in str(excinfo.value)
