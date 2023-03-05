@@ -21,7 +21,7 @@ jobs:
           pip install -r requirements.dev.txt
       - name: Test with pytest
         run: |
-          pytest
+          coverage run --source=aioetherscan -m pytest tests/
       - name: Coveralls
         uses: AndreMiras/coveralls-python-action@develop
         with:
