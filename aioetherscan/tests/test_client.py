@@ -1,7 +1,7 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import pytest
-from asynctest import CoroutineMock
+import pytest_asyncio
 
 from aioetherscan import Client
 from aioetherscan.modules.account import Account
@@ -17,7 +17,7 @@ from aioetherscan.network import Network
 from aioetherscan.url_builder import UrlBuilder
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def client():
     c = Client('TestApiKey')
     yield c
@@ -59,6 +59,6 @@ def test_init(client):
 
 @pytest.mark.asyncio
 async def test_close_session(client):
-    with patch('aioetherscan.network.Network.close', new_callable=CoroutineMock) as m:
+    with patch('aioetherscan.network.Network.close', new_callable=AsyncMock) as m:
         await client.close()
         m.assert_called_once_with()

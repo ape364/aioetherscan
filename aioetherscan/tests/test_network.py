@@ -1,16 +1,15 @@
 import asyncio
 import json
 import logging
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import aiohttp
 import pytest
+import pytest_asyncio
 from aiohttp import ClientTimeout
 from aiohttp.hdrs import METH_GET, METH_POST
 from aiohttp_retry import ExponentialRetry
 from asyncio_throttle import Throttler
-from asynctest import CoroutineMock, MagicMock
-from asynctest import patch
 
 from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
     EtherscanClientProxyError
@@ -18,7 +17,7 @@ from aioetherscan.network import Network
 from aioetherscan.url_builder import UrlBuilder
 
 
-class SessionMock(CoroutineMock):
+class SessionMock(AsyncMock):
     # noinspection PyUnusedLocal
     @pytest.mark.asyncio
     async def get(self, url, params, data):
@@ -39,13 +38,13 @@ def get_loop():
     return asyncio.get_event_loop()
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def ub():
     ub = UrlBuilder('test_api_key', 'eth', 'main')
     yield ub
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def nw(ub):
     nw = Network(ub, get_loop(), None, None, None, None)
     yield nw
@@ -74,22 +73,22 @@ def test_init(ub):
 
 @pytest.mark.asyncio
 async def test_get(nw):
-    with patch('aioetherscan.network.Network._request', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.get()
         mock.assert_called_once_with(METH_GET, params={'apikey': nw._url_builder._API_KEY})
 
 
 @pytest.mark.asyncio
 async def test_post(nw):
-    with patch('aioetherscan.network.Network._request', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post()
         mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY})
 
-    with patch('aioetherscan.network.Network._request', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data'})
         mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
 
-    with patch('aioetherscan.network.Network._request', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data', 'null': None})
         mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
 
@@ -99,8 +98,8 @@ async def test_request(nw):
     class MagicMockContext(MagicMock):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            type(self).__aenter__ = CoroutineMock(return_value=MagicMock())
-            type(self).__aexit__ = CoroutineMock(return_value=MagicMock())
+            type(self).__aenter__ = AsyncMock(return_value=MagicMock())
+            type(self).__aexit__ = AsyncMock(return_value=MagicMock())
 
     nw._retry_client = AsyncMock()
 
@@ -110,7 +109,7 @@ async def test_request(nw):
 
     get_mock = MagicMockContext()
     nw._retry_client.get = get_mock
-    with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
+    with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_GET)
         throttler_mock.assert_awaited_once()
         get_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
@@ -118,7 +117,7 @@ async def test_request(nw):
 
     post_mock = MagicMockContext()
     nw._retry_client.post = post_mock
-    with patch('aioetherscan.network.Network._handle_response', new=CoroutineMock()) as h:
+    with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_POST)
         throttler_mock.assert_awaited()
         post_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
@@ -171,12 +170,12 @@ async def test_handle_response(nw):
 
 @pytest.mark.asyncio
 async def test_close_session(nw):
-    with patch('aiohttp.ClientSession.close', new_callable=CoroutineMock) as m:
+    with patch('aiohttp.ClientSession.close', new_callable=AsyncMock) as m:
         await nw.close()
-        m: CoroutineMock
+        m: AsyncMock
         m.assert_not_called()
 
         nw._retry_client = MagicMock()
-        nw._retry_client.close = CoroutineMock()
+        nw._retry_client.close = AsyncMock()
         await nw.close()
         nw._retry_client.close.assert_called_once()

@@ -7,7 +7,7 @@
 [![Versions](https://img.shields.io/pypi/pyversions/aioetherscan.svg)](https://pypi.org/project/aioetherscan/)
 
 
-[Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper. Tested with Python 3.10.
+[Etherscan.io](https://etherscan.io) [API](https://etherscan.io/apis) async Python non-official wrapper.
 
 ## Features
 
@@ -24,7 +24,9 @@ Supports all API modules:
 * [Tokens](https://etherscan.io/apis#tokens)
 * [Stats](https://etherscan.io/apis#stats)
 
-Also provides 3rd party `utils` module, which allows to fetch a lot of transactions without timeouts and not getting banned.
+Also provides extra modules:
+* `utils` allows to fetch a lot of transactions without timeouts and not getting banned
+* `links` helps to compose links to address/tx/etc
 
 ### Blockchains
 
@@ -50,20 +52,26 @@ Register Etherscan account and [create free API key](https://etherscan.io/myapik
 ```python
 import asyncio
 
-from aioetherscan import Client
+from aiohttp_retry import ExponentialRetry
 from asyncio_throttle import Throttler
+
+from aioetherscan import Client
 
 
 async def main():
-    c = Client('apikey')
-    throttler = Throttler(rate_limit=5, period=1.0)
+    throttler = Throttler(rate_limit=1, period=6.0)
+    retry_options = ExponentialRetry(attempts=2)
+
+    c = Client('YourApiKeyToken', throttler=throttler, retry_options=retry_options)
+
     try:
         print(await c.stats.eth_price())
         print(await c.block.block_reward(123456))
 
         async for t in c.utils.token_transfers_generator(
-            address='0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
-            throttler=throttler
+                address='0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
+                start_block=16734850,
+                end_block=16734850
         ):
             print(t)
     finally:

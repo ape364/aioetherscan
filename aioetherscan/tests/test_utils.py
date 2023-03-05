@@ -1,14 +1,13 @@
-from unittest.mock import patch, call
+from unittest.mock import patch, call, AsyncMock, MagicMock
 
-import asynctest
 import pytest
-from asynctest import CoroutineMock, MagicMock
+import pytest_asyncio
 
 from aioetherscan import Client
 from aioetherscan.exceptions import EtherscanClientApiError
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def utils():
     c = Client('TestApiKey')
     yield c.utils
@@ -30,7 +29,7 @@ def test_generate_intervals(utils):
 
 @pytest.mark.asyncio
 async def test_parse_by_pages(utils):
-    with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
+    with patch('aioetherscan.modules.account.Account.token_transfers', new=AsyncMock()) as transfers_mock:
         transfers_mock.side_effect = EtherscanClientApiError('No transactions found', None)
         async for _ in utils._parse_by_pages(
                 100,
@@ -52,7 +51,7 @@ async def test_parse_by_pages(utils):
 
 @pytest.mark.asyncio
 async def test_parse_by_pages_exception(utils):
-    with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
+    with patch('aioetherscan.modules.account.Account.token_transfers', new=AsyncMock()) as transfers_mock:
         transfers_mock.side_effect = EtherscanClientApiError('other msg', None)
         try:
             async for _ in utils._parse_by_pages(
@@ -81,7 +80,7 @@ async def test_parse_by_pages_result(utils):
         for x in gen:
             return x
 
-    with patch('aioetherscan.modules.account.Account.token_transfers', new=CoroutineMock()) as transfers_mock:
+    with patch('aioetherscan.modules.account.Account.token_transfers', new=AsyncMock()) as transfers_mock:
         transfers_mock.side_effect = token_transfers_side_effect
 
         i = 0
@@ -130,7 +129,7 @@ async def test_parse_by_pages_result(utils):
 
 @pytest.mark.asyncio
 async def test_token_transfers(utils):
-    with asynctest.patch(
+    with patch(
             'aioetherscan.modules.extra.utils.Utils.token_transfers_generator',
             new=MagicMock()
     ) as transfers_gen_mock:
@@ -151,7 +150,7 @@ async def test_token_transfers(utils):
 @pytest.mark.asyncio
 async def test_token_transfers_generator(utils):
     with patch('aioetherscan.modules.extra.utils.Utils._parse_by_pages', new=MagicMock()) as parse_mock:
-        with patch('aioetherscan.modules.proxy.Proxy.block_number', new=CoroutineMock()) as proxy_mock:
+        with patch('aioetherscan.modules.proxy.Proxy.block_number', new=AsyncMock()) as proxy_mock:
             proxy_mock.return_value = '0x14'
 
             async for _ in utils.token_transfers_generator(address='addr'):
@@ -191,14 +190,14 @@ async def test_one_of_addresses_is_supplied(utils):
 
 @pytest.mark.asyncio
 async def test_is_contract(utils):
-    with asynctest.patch('aioetherscan.modules.contract.Contract.contract_abi', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.modules.contract.Contract.contract_abi', new=AsyncMock()) as mock:
         await utils.is_contract(address='addr')
         mock.assert_called_once_with(address='addr')
 
 
 @pytest.mark.asyncio
 async def test_get_contract_creator(utils):
-    with asynctest.patch('aioetherscan.modules.account.Account.internal_txs', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.modules.account.Account.internal_txs', new=AsyncMock()) as mock:
         await utils.get_contract_creator(contract_address='addr')
         mock.assert_called_once_with(
             address='addr',
@@ -206,5 +205,3 @@ async def test_get_contract_creator(utils):
             page=1,
             offset=1
         )
-
-

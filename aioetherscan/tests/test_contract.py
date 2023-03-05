@@ -1,12 +1,12 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import pytest
-from asynctest import CoroutineMock
+import pytest_asyncio
 
 from aioetherscan import Client
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def contract():
     c = Client('TestApiKey')
     yield c.contract
@@ -15,21 +15,21 @@ async def contract():
 
 @pytest.mark.asyncio
 async def test_contract_abi(contract):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.contract_abi('0x012345')
         mock.assert_called_once_with(params=dict(module='contract', action='getabi', address='0x012345'))
 
 
 @pytest.mark.asyncio
 async def test_contract_source_code(contract):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.contract_source_code('0x012345')
         mock.assert_called_once_with(params=dict(module='contract', action='getsourcecode', address='0x012345'))
 
 
 @pytest.mark.asyncio
 async def test_verify_contract_source_code(contract):
-    with patch('aioetherscan.network.Network.post', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.post', new=AsyncMock()) as mock:
         await contract.verify_contract_source_code(
             contract_address='0x012345',
             source_code='some source code\ntest',
@@ -53,7 +53,7 @@ async def test_verify_contract_source_code(contract):
             )
         )
 
-    with patch('aioetherscan.network.Network.post', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.post', new=AsyncMock()) as mock:
         await contract.verify_contract_source_code(
             contract_address='0x012345',
             source_code='some source code\ntest',
@@ -85,7 +85,7 @@ async def test_verify_contract_source_code(contract):
 
 @pytest.mark.asyncio
 async def test_check_verification_status(contract):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.check_verification_status('some_guid')
         mock.assert_called_once_with(params=dict(module='contract', action='checkverifystatus', guid='some_guid'))
 

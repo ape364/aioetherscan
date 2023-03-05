@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 
 from aioetherscan.url_builder import UrlBuilder
 
@@ -7,7 +8,7 @@ def apikey():
     return 'test_api_key'
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def ub():
     ub = UrlBuilder(apikey(), 'eth', 'main')
     yield ub

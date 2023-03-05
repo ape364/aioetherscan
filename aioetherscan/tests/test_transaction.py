@@ -1,12 +1,12 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import pytest
-from asynctest import CoroutineMock
+import pytest_asyncio
 
 from aioetherscan import Client
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def transaction():
     c = Client('TestApiKey')
     yield c.transaction
@@ -15,13 +15,13 @@ async def transaction():
 
 @pytest.mark.asyncio
 async def test_contract_execution_status(transaction):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await transaction.contract_execution_status('0x123')
         mock.assert_called_once_with(params=dict(module='transaction', action='getstatus', txhash='0x123'))
 
 
 @pytest.mark.asyncio
 async def test_tx_receipt_status(transaction):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await transaction.tx_receipt_status('0x123')
         mock.assert_called_once_with(params=dict(module='transaction', action='gettxreceiptstatus', txhash='0x123'))

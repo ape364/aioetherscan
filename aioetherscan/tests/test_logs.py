@@ -1,12 +1,12 @@
-from unittest.mock import patch, Mock, call
+from unittest.mock import patch, Mock, call, AsyncMock
 
 import pytest
-from asynctest import CoroutineMock
+import pytest_asyncio
 
 from aioetherscan import Client
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def logs():
     c = Client('TestApiKey')
     yield c.logs
@@ -15,7 +15,7 @@ async def logs():
 
 @pytest.mark.asyncio
 async def test_balance(logs):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await logs.get_logs(
             from_block=1,
             to_block=2,
@@ -33,7 +33,7 @@ async def test_balance(logs):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await logs.get_logs(
             from_block='latest',
             to_block='latest',
@@ -51,7 +51,7 @@ async def test_balance(logs):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         with patch('aioetherscan.modules.logs.Logs._check_block', new=Mock()) as block_mock:
             await logs.get_logs(
                 from_block=1,
@@ -63,7 +63,7 @@ async def test_balance(logs):
             block_mock.assert_has_calls([call(1), call(2)])
             mock.assert_called_once()
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         with patch('aioetherscan.modules.logs.Logs._fill_topics', new=Mock()) as topic_mock:
             topic_mock.return_value = {}
             await logs.get_logs(
@@ -75,7 +75,7 @@ async def test_balance(logs):
             topic_mock.assert_called_once_with(['topic', ], None)
             mock.assert_called_once()
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         with patch('aioetherscan.modules.logs.Logs._fill_topics', new=Mock()) as topic_mock:
             topic_mock.return_value = {}
             await logs.get_logs(

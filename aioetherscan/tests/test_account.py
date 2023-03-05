@@ -1,12 +1,12 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 import pytest
-from asynctest import CoroutineMock
+import pytest_asyncio
 
 from aioetherscan import Client
 
 
-@pytest.fixture()
+@pytest_asyncio.fixture
 async def account():
     c = Client('TestApiKey')
     yield c.account
@@ -15,30 +15,30 @@ async def account():
 
 @pytest.mark.asyncio
 async def test_balance(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balance('addr')
         mock.assert_called_once_with(params=dict(module='account', action='balance', address='addr', tag='latest'))
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balance('addr', 123)
         mock.assert_called_once_with(params=dict(module='account', action='balance', address='addr', tag='0x7b'))
 
 
 @pytest.mark.asyncio
 async def test_balances(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balances(['a1', 'a2'])
         mock.assert_called_once_with(
             params=dict(module='account', action='balancemulti', address='a1,a2', tag='latest'))
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balances(['a1', 'a2'], 123)
         mock.assert_called_once_with(params=dict(module='account', action='balancemulti', address='a1,a2', tag='0x7b'))
 
 
 @pytest.mark.asyncio
 async def test_normal_txs(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.normal_txs('addr')
         mock.assert_called_once_with(
             params=dict(
@@ -53,7 +53,7 @@ async def test_normal_txs(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.normal_txs(
             address='addr',
             start_block=1,
@@ -83,7 +83,7 @@ async def test_normal_txs(account):
 
 @pytest.mark.asyncio
 async def test_internal_txs(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.internal_txs('addr')
         mock.assert_called_once_with(
             params=dict(
@@ -99,7 +99,7 @@ async def test_internal_txs(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.internal_txs(
             address='addr',
             start_block=1,
@@ -131,7 +131,7 @@ async def test_internal_txs(account):
 
 @pytest.mark.asyncio
 async def test_token_transfers(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_transfers('addr')
         mock.assert_called_once_with(
             params=dict(
@@ -147,7 +147,7 @@ async def test_token_transfers(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_transfers(contract_address='addr')
         mock.assert_called_once_with(
             params=dict(
@@ -163,7 +163,7 @@ async def test_token_transfers(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_transfers(
             address='addr',
             start_block=1,
@@ -199,7 +199,7 @@ async def test_token_transfers(account):
 
 @pytest.mark.asyncio
 async def test_mined_blocks(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.mined_blocks('addr')
         mock.assert_called_once_with(
             params=dict(
@@ -212,7 +212,7 @@ async def test_mined_blocks(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.mined_blocks(
             address='addr',
             blocktype='uncles',
@@ -239,7 +239,7 @@ async def test_mined_blocks(account):
 
 @pytest.mark.asyncio
 async def test_token_balance(account):
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_balance('addr', 'contractaddr')
         mock.assert_called_once_with(
             params=dict(
@@ -251,7 +251,7 @@ async def test_token_balance(account):
             )
         )
 
-    with patch('aioetherscan.network.Network.get', new=CoroutineMock()) as mock:
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_balance('addr', 'contractaddr', 123)
         mock.assert_called_once_with(
             params=dict(
