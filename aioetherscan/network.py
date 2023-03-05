@@ -45,8 +45,13 @@ class Network:
         return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
     def _get_retry_client(self) -> RetryClient:
+        if self._timeout is not None:
+            session = ClientSession(loop=self._loop, timeout=self._timeout)
+        else:
+            session = ClientSession(loop=self._loop)
+
         return RetryClient(
-            client_session=ClientSession(loop=self._loop, timeout=self._timeout),
+            client_session=session,
             retry_options=self._retry_options
         )
 
