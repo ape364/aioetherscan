@@ -7,19 +7,21 @@ from aiohttp_retry import RetryOptionsBase
 from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
+from aioetherscan.modules.extra.links import LinkHelper
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
 from aioetherscan.modules.transaction import Transaction
-from aioetherscan.modules.utils import Utils
-from aioetherscan.network import Network
+from aioetherscan.modules.extra.utils import Utils
+from aioetherscan.network import Network, UrlBuilder
 
 
 class Client:
     def __init__(self, api_key: str, api_kind: str = 'eth', network: str = 'main',
                  loop: AbstractEventLoop = None, timeout: ClientTimeout = None, proxy: str = None,
                  throttler: AsyncContextManager = None, retry_options: RetryOptionsBase = None) -> None:
-        self._http = Network(api_key, api_kind, network, loop, timeout, proxy, throttler, retry_options)
+        self._url_builder = UrlBuilder(api_key, api_kind, network)
+        self._http = Network(self._url_builder, loop, timeout, proxy, throttler, retry_options)
 
         self.account = Account(self)
         self.block = Block(self)
@@ -29,7 +31,8 @@ class Client:
         self.logs = Logs(self)
         self.proxy = Proxy(self)
 
-        self.utils = Utils(self, self._http.BASE_URL)
+        self.utils = Utils(self)
+        self.links = LinkHelper(self._url_builder)
 
     async def close(self):
         await self._http.close()

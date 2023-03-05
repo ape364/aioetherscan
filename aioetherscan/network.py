@@ -1,42 +1,25 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop
-from enum import Enum
 from typing import Union, Dict, List, AsyncContextManager, Optional
-from urllib.parse import urlunsplit
 
 import aiohttp
 from aiohttp import ClientTimeout
 from aiohttp.client import ClientSession
+from aiohttp.hdrs import METH_GET, METH_POST
 from aiohttp_retry import RetryOptionsBase, RetryClient
 from asyncio_throttle import Throttler
 
 from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
     EtherscanClientProxyError
-
-
-class HttpMethod(Enum):
-    GET = 'get'
-    POST = 'post'
+from aioetherscan.url_builder import UrlBuilder
 
 
 class Network:
-    _API_KINDS = {
-        'eth': 'etherscan.io',
-        'bsc': 'bscscan.com',
-        'avax': 'snowtrace.io',
-        'polygon': 'polygonscan.com',
-        'optimism': 'etherscan.io',
-        'arbitrum': 'arbiscan.io',
-        'fantom': 'ftmscan.com',
-    }
-    BASE_URL: str = None
-
-    def __init__(self, api_key: str, api_kind: str, network: str,
+    def __init__(self, url_builder: UrlBuilder,
                  loop: Optional[AbstractEventLoop], timeout: Optional[ClientTimeout], proxy: Optional[str],
                  throttler: Optional[AsyncContextManager], retry_options: Optional[RetryOptionsBase]) -> None:
-        self._API_KEY = api_key
-        self._set_network(api_kind, network)
+        self._url_builder = url_builder
 
         self._loop = loop or asyncio.get_event_loop()
         self._timeout = timeout
@@ -56,10 +39,10 @@ class Network:
             await self._retry_client.close()
 
     async def get(self, params: Dict = None) -> Union[Dict, List, str]:
-        return await self._request(HttpMethod.GET, params=self._filter_and_sign(params))
+        return await self._request(METH_GET, params=self._url_builder.filter_and_sign(params))
 
     async def post(self, data: Dict = None) -> Union[Dict, List, str]:
-        return await self._request(HttpMethod.POST, data=self._filter_and_sign(data))
+        return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
     def _get_retry_client(self) -> RetryClient:
         return RetryClient(
@@ -67,13 +50,14 @@ class Network:
             retry_options=self._retry_options
         )
 
-    async def _request(self, method: HttpMethod, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
+    async def _request(self, method: str, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
         if self._retry_client is None:
             self._retry_client = self._get_retry_client()
-        session_method = getattr(self._retry_client, method.value)
+        session_method = getattr(self._retry_client, method.lower())
         async with self._throttler:
-            async with session_method(self._API_URL, params=params, data=data, proxy=self._proxy) as response:
-                self._logger.debug('[%s] %r %r %s', method.name, str(response.url), data, response.status)
+            async with session_method(self._url_builder.API_URL, params=params, data=data,
+                                      proxy=self._proxy) as response:
+                self._logger.debug('[%s] %r %r %s', method, str(response.url), data, response.status)
                 return await self._handle_response(response)
 
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Union[Dict, list, str]:
@@ -98,55 +82,3 @@ class Network:
             err = response_json['error']
             code, message = err.get('code'), err.get('message')
             raise EtherscanClientProxyError(code, message)
-
-    def _filter_and_sign(self, params: Dict):
-        return self._sign(
-            self._filter_params(params or {})
-        )
-
-    def _sign(self, params: Dict) -> Dict:
-        if not params:
-            params = {}
-        params['apikey'] = self._API_KEY
-        return params
-
-    @staticmethod
-    def _filter_params(params: Dict) -> Dict:
-        return {k: v for k, v in params.items() if v is not None}
-
-    def _set_network(self, api_kind: str, network: str, scheme: str = 'https', path: str = 'api') -> None:
-        try:
-            base_netloc = self._API_KINDS[api_kind.lower().strip()]
-        except KeyError:
-            raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
-        else:
-            self._API_KIND = api_kind.lower().strip()
-            self._NETWORK = network.lower().strip()
-
-            self._API_URL = self._get_api_url(base_netloc, scheme, path)
-            self.BASE_URL = self._get_base_url(base_netloc, scheme)
-
-    def _get_api_url(self, base_netloc: str, scheme: str, path: str) -> str:
-        is_main = self._NETWORK == 'main'
-
-        if self._API_KIND == 'optimism':
-            prefix = 'api-optimistic' if is_main else f'api-{self._NETWORK}-optimistic'
-        else:
-            prefix = 'api' if is_main else f'api-{self._NETWORK}'
-
-        return urlunsplit((scheme, f'{prefix}.{base_netloc}', path, '', ''))
-
-    def _get_base_url(self, base_netloc: str, scheme: str) -> str:
-        if self._API_KIND == 'polygon' and self._NETWORK == 'testnet':
-            network = 'mumbai'
-        else:
-            network = self._NETWORK
-
-        is_main = network == 'main'
-
-        if self._API_KIND == 'optimism':
-            prefix = 'optimistic' if is_main else f'{network}-optimism'
-        else:
-            prefix = None if is_main else network
-
-        return urlunsplit((scheme, base_netloc if prefix is None else f'{prefix}.{base_netloc}', '', '', ''))
