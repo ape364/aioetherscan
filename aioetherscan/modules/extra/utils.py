@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class Utils:
     """Helper methods which use the combination of documented APIs."""
 
-    def __init__(self, client: "Client"):
+    def __init__(self, client: 'Client'):
         self._client = client
 
     async def token_transfers_generator(

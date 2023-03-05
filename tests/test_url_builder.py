@@ -27,7 +27,7 @@ def test_filter_params(ub):
 
 
 @pytest.mark.parametrize(
-    "api_kind,network_name,expected",
+    'api_kind,network_name,expected',
     [
         ('eth', 'main', 'https://api.etherscan.io/api'),
         ('eth', 'ropsten', 'https://api-ropsten.etherscan.io/api'),
@@ -56,7 +56,7 @@ def test_api_url(api_kind, network_name, expected):
 
 
 @pytest.mark.parametrize(
-    "api_kind,network_name,expected",
+    'api_kind,network_name,expected',
     [
         ('eth', 'main', 'https://etherscan.io'),
         ('eth', 'ropsten', 'https://ropsten.etherscan.io'),
