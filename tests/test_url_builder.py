@@ -88,3 +88,19 @@ def test_invalid_api_kind():
     with pytest.raises(ValueError) as exception:
         UrlBuilder(apikey(), 'wrong', 'main')
     assert 'Incorrect api_kind' in str(exception.value)
+
+@pytest.mark.parametrize(
+    'api_kind,expected',
+    [
+        ('eth', 'ETH'),
+        ('bsc', 'BNB'),
+        ('avax', 'AVAX'),
+        ('polygon', 'MATIC'),
+        ('optimism', 'ETH'),
+        ('arbitrum', 'ETH'),
+        ('fantom', 'FTM'),
+    ]
+)
+def test_base_url(api_kind, expected):
+    ub = UrlBuilder(apikey(), api_kind, 'main')
+    assert ub.currency == expected

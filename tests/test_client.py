@@ -1,4 +1,4 @@
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, PropertyMock
 
 import pytest
 import pytest_asyncio
@@ -62,3 +62,12 @@ async def test_close_session(client):
     with patch('aioetherscan.network.Network.close', new_callable=AsyncMock) as m:
         await client.close()
         m.assert_called_once_with()
+
+
+def test_currency(client):
+    with patch('aioetherscan.url_builder.UrlBuilder.currency', new_callable=PropertyMock) as m:
+        currency = 'ETH'
+        m.return_value = currency
+
+        assert client.currency == currency
+        m.assert_called_once()

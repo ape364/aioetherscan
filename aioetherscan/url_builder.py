@@ -4,13 +4,13 @@ from urllib.parse import urlunsplit, urljoin
 
 class UrlBuilder:
     _API_KINDS = {
-        'eth': 'etherscan.io',
-        'bsc': 'bscscan.com',
-        'avax': 'snowtrace.io',
-        'polygon': 'polygonscan.com',
-        'optimism': 'etherscan.io',
-        'arbitrum': 'arbiscan.io',
-        'fantom': 'ftmscan.com',
+        'eth': ('etherscan.io', 'ETH'),
+        'bsc': ('bscscan.com', 'BNB'),
+        'avax': ('snowtrace.io', 'AVAX'),
+        'polygon': ('polygonscan.com', 'MATIC'),
+        'optimism': ('etherscan.io', 'ETH'),
+        'arbitrum': ('arbiscan.io', 'ETH'),
+        'fantom': ('ftmscan.com', 'FTM'),
     }
 
     BASE_URL: str = None
@@ -38,7 +38,13 @@ class UrlBuilder:
 
     @property
     def _base_netloc(self) -> str:
-        return self._API_KINDS[self._api_kind]
+        netloc, _ = self._API_KINDS[self._api_kind]
+        return netloc
+
+    @property
+    def currency(self) -> str:
+        _, currency = self._API_KINDS[self._api_kind]
+        return currency
 
     def get_link(self, path: str) -> str:
         return urljoin(self.BASE_URL, path)

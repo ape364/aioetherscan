@@ -8,11 +8,11 @@ from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
 from aioetherscan.modules.extra.links import LinkHelper
+from aioetherscan.modules.extra.utils import Utils
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
 from aioetherscan.modules.transaction import Transaction
-from aioetherscan.modules.extra.utils import Utils
 from aioetherscan.network import Network, UrlBuilder
 
 
@@ -33,6 +33,10 @@ class Client:
 
         self.utils = Utils(self)
         self.links = LinkHelper(self._url_builder)
+
+    @property
+    def currency(self) -> str:
+        return self._url_builder.currency
 
     async def close(self):
         await self._http.close()
