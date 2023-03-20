@@ -41,7 +41,7 @@ class BlocksParser:
                 blocks_range = self._blocks_range.get_blocks_range()
                 last_seen_block, transfers = await self._fetch_blocks_range(blocks_range)
             except EtherscanClientApiError as e:
-                self._logger.warning(f'Error: {e}')
+                self._logger.error(f'Error: {e}')
                 self._blocks_range.limit.reduce()
             else:
                 self._blocks_range.current_block = last_seen_block + 1
@@ -50,7 +50,7 @@ class BlocksParser:
                 for transfer in transfers:
                     yield transfer
 
-                self._logger.debug(
+                self._logger.info(
                     f'[{self._blocks_range.blocks_done / self._blocks_range.size:.2%}] '
                     f'Current block {self._blocks_range.current_block:,} '
                     f'({self._blocks_range.blocks_left:,} blocks left)'
