@@ -7,8 +7,9 @@ from aioetherscan import Client
 from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
-from aioetherscan.modules.extra.links import LinkHelper
-from aioetherscan.modules.extra.utils import Utils
+from aioetherscan.modules.extra import ExtraModules, ContractUtils
+from aioetherscan.modules.extra.generators.account_proxy import GeneratorUtils
+from aioetherscan.modules.extra.link import LinkUtils
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
@@ -42,8 +43,10 @@ def test_init(client):
     assert isinstance(client.logs, Logs)
     assert isinstance(client.proxy, Proxy)
 
-    assert isinstance(client.utils, Utils)
-    assert isinstance(client.links, LinkHelper)
+    assert isinstance(client.extra, ExtraModules)
+    assert isinstance(client.extra.link, LinkUtils)
+    assert isinstance(client.extra.contract, ContractUtils)
+    assert isinstance(client.extra.generators, GeneratorUtils)
 
     assert isinstance(client.account._client, Client)
     assert isinstance(client.block._client, Client)
@@ -53,8 +56,10 @@ def test_init(client):
     assert isinstance(client.logs._client, Client)
     assert isinstance(client.proxy._client, Client)
 
-    assert isinstance(client.utils._client, Client)
-    assert isinstance(client.links._url_builder, UrlBuilder)
+    assert isinstance(client.extra._client, Client)
+    assert isinstance(client.extra.contract._client, Client)
+    assert isinstance(client.extra.generators._client, Client)
+    assert isinstance(client.extra.link._url_builder, UrlBuilder)
 
 
 @pytest.mark.asyncio
