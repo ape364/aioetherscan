@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from aioetherscan.url_builder import UrlBuilder
 
 
-class LinkHelper:
+class LinkUtils:
     def __init__(self, url_builder: UrlBuilder):
         self._url_builder = url_builder
 
