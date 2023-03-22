@@ -10,11 +10,12 @@ Transfer: TypeAlias = dict[str, Any]
 
 
 class BlocksParser:
+    _OFFSET: int = 10_000
+
     def __init__(
             self,
             api_method: Callable,
             request_params: dict[str, Any],
-            txs_per_page: int,
             start_block: int,
             end_block: int,
             blocks_limit: int,
@@ -29,8 +30,6 @@ class BlocksParser:
             blocks_limit,
             blocks_limit_divider
         )
-
-        self._txs_per_page = txs_per_page
 
         self._logger = logging.getLogger(__name__)
         self._total_txs = 0
@@ -61,7 +60,7 @@ class BlocksParser:
             start_block=blocks_range.start,
             end_block=blocks_range.stop,
             page=1,
-            offset=self._txs_per_page,
+            offset=self._OFFSET,
         )
         params = self._request_params | current_params
         self._logger.debug(f'Request params: {params}')
@@ -82,15 +81,15 @@ class BlocksParser:
 
             transfers_max_block = get_max_block_number(transfers)
 
-            if transfers_count == self._txs_per_page:
+            if transfers_count == self._OFFSET:
                 self._logger.debug(
-                    f'Probably not all txs fetched, dropping last block {transfers_max_block:,} and returning transfers'
+                    f'Probably not all txs have been fetched, dropping txs with the last block {transfers_max_block:,}'
                 )
                 return transfers_max_block - 1, drop_block(
                     transfers, transfers_max_block
                 )
             else:
                 self._logger.debug(
-                    'All txs fetched in this blocks range, returning transfers'
+                    'All txs have been fetched'
                 )
                 return transfers_max_block, transfers

@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 class GeneratorUtils:
     DEFAULT_START_BLOCK: int = 0
-    DEFAULT_TXS_PER_PAGE: int = 10_000
     DEFAULT_BLOCKS_LIMIT: int = 2048
     DEFAULT_BLOCKS_LIMIT_DIVIDER: int = 2
 
@@ -24,7 +23,6 @@ class GeneratorUtils:
             address: str = None,
             start_block: int = DEFAULT_START_BLOCK,
             end_block: Optional[int] = None,
-            txs_per_page: int = DEFAULT_TXS_PER_PAGE,
             blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
             blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
@@ -37,7 +35,6 @@ class GeneratorUtils:
             address: str,
             start_block: int = DEFAULT_START_BLOCK,
             end_block: Optional[int] = None,
-            txs_per_page: int = DEFAULT_TXS_PER_PAGE,
             blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
             blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
@@ -50,7 +47,6 @@ class GeneratorUtils:
             address: str,
             start_block: int = DEFAULT_START_BLOCK,
             end_block: Optional[int] = None,
-            txs_per_page: int = DEFAULT_TXS_PER_PAGE,
             blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
             blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
             txhash: Optional[str] = None,
@@ -60,7 +56,8 @@ class GeneratorUtils:
             yield transfer
 
     async def mined_blocks(
-            self, address: str, blocktype: str, offset: int = DEFAULT_TXS_PER_PAGE) -> AsyncIterator[Transfer]:
+            self, address: str, blocktype: str, offset: int = 10_000
+    ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.mined_blocks, locals())
         async for transfer in self._parse_by_pages(**parser_params):
             yield transfer
@@ -69,7 +66,6 @@ class GeneratorUtils:
             self,
             api_method: Callable,
             request_params: dict[str, Any],
-            txs_per_page: int,
             start_block: int,
             end_block: int,
             blocks_limit: int,
@@ -79,7 +75,7 @@ class GeneratorUtils:
             end_block = await self._get_current_block()
 
         blocks_parser = BlocksParser(
-            api_method, request_params, txs_per_page,
+            api_method, request_params,
             start_block, end_block, blocks_limit, blocks_limit_divider
         )
         async for tx in blocks_parser.txs_generator():
