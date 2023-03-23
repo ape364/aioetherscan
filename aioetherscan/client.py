@@ -36,5 +36,13 @@ class Client:
     def currency(self) -> str:
         return self._url_builder.currency
 
+    @property
+    def api_kind(self) -> str:
+        return self._url_builder.api_kind.title()
+
+    @property
+    def scaner_url(self) -> str:
+        return self._url_builder.BASE_URL
+
     async def close(self):
         await self._http.close()
