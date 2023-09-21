@@ -33,6 +33,16 @@ class Contract(BaseModule):
             address=address
         )
 
+    async def contract_creation(self, address: str) -> List[Dict]:
+        """Get Contract deployer address and transaction hash it was created
+
+        https://etherscan.io/contractsVerified.
+        """
+        return await self._get(
+            action='getcontractcreation',
+            contractaddresses=address
+        )
+
     async def verify_contract_source_code(
             self,
             contract_address: str,
