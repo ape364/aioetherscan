@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Iterable, Dict, List
 
 from aioetherscan.modules.base import BaseModule
 
@@ -31,6 +31,16 @@ class Contract(BaseModule):
         return await self._get(
             action='getsourcecode',
             address=address
+        )
+
+    async def contract_creation(self, addresses: Iterable[str]) -> List[Dict]:
+        """Get Contract deployer address and transaction hash it was created
+
+        https://etherscan.io/contractsVerified.
+        """
+        return await self._get(
+            action='getcontractcreation',
+            contractaddresses=','.join(addresses)
         )
 
     async def verify_contract_source_code(

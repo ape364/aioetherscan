@@ -26,6 +26,12 @@ async def test_contract_source_code(contract):
         await contract.contract_source_code('0x012345')
         mock.assert_called_once_with(params=dict(module='contract', action='getsourcecode', address='0x012345'))
 
+@pytest.mark.asyncio
+async def test_contract_creation(contract):
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
+        await contract.contract_creation(['0x012345', '0x678901'])
+        mock.assert_called_once_with(
+            params=dict(module='contract', action='getcontractcreation', contractaddresses='0x012345,0x678901'))
 
 @pytest.mark.asyncio
 async def test_verify_contract_source_code(contract):
