@@ -44,14 +44,14 @@ class Network:
     async def post(self, data: Dict = None) -> Union[Dict, List, str]:
         return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
-    def _get_retry_client(self) -> RetryClient:
+    def _get_session(self):
         if self._timeout is not None:
-            session = ClientSession(loop=self._loop, timeout=self._timeout)
-        else:
-            session = ClientSession(loop=self._loop)
+            return ClientSession(loop=self._loop, timeout=self._timeout)
+        return ClientSession(loop=self._loop)
 
+    def _get_retry_client(self) -> RetryClient:
         return RetryClient(
-            client_session=session,
+            client_session=self._get_session(),
             retry_options=self._retry_options
         )
 

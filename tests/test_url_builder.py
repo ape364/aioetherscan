@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 import pytest_asyncio
 
@@ -89,6 +91,7 @@ def test_invalid_api_kind():
         UrlBuilder(apikey(), 'wrong', 'main')
     assert 'Incorrect api_kind' in str(exception.value)
 
+
 @pytest.mark.parametrize(
     'api_kind,expected',
     [
@@ -104,3 +107,10 @@ def test_invalid_api_kind():
 def test_base_url(api_kind, expected):
     ub = UrlBuilder(apikey(), api_kind, 'main')
     assert ub.currency == expected
+
+
+def test_get_link(ub):
+    with patch('aioetherscan.url_builder.urljoin') as join_mock:
+        path = 'some_path'
+        ub.get_link(path)
+        join_mock.assert_called_once_with(ub.BASE_URL, path)

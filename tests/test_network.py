@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock, Mock
 
 import aiohttp
 import pytest
@@ -93,6 +93,44 @@ async def test_post(nw):
         mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
 
 
+def test_get_session_timeout_empty(nw):
+    nw._timeout = None
+    loop_mock = Mock()
+    nw._loop = loop_mock
+    with patch('aioetherscan.network.ClientSession') as session_mock:
+        rc = nw._get_session()
+        session_mock.assert_called_once_with(loop=loop_mock)
+        assert rc is session_mock.return_value
+
+
+def test_get_session_timeout_non_empty(nw):
+    timeout = 5
+    nw._timeout = timeout
+    loop_mock = Mock()
+    nw._loop = loop_mock
+    with patch('aioetherscan.network.ClientSession') as session_mock:
+        session = nw._get_session()
+        session_mock.assert_called_once_with(loop=loop_mock, timeout=timeout)
+        assert session is session_mock.return_value
+
+
+def test_get_retry_client(nw):
+    session_mock = Mock()
+    nw._get_session = session_mock
+
+    retry_options_mock = Mock()
+    nw._retry_options = retry_options_mock
+
+    with patch('aioetherscan.network.RetryClient') as rc_mock:
+        rc = nw._get_retry_client()
+
+        rc_mock.assert_called_once_with(
+            client_session=session_mock.return_value,
+            retry_options=retry_options_mock
+        )
+        assert rc is rc_mock.return_value
+
+
 @pytest.mark.asyncio
 async def test_request(nw):
     class MagicMockContext(MagicMock):
@@ -101,24 +139,29 @@ async def test_request(nw):
             type(self).__aenter__ = AsyncMock(return_value=MagicMock())
             type(self).__aexit__ = AsyncMock(return_value=MagicMock())
 
-    nw._retry_client = AsyncMock()
-
     throttler_mock = AsyncMock()
     nw._throttler = AsyncMock()
     nw._throttler.__aenter__ = throttler_mock
 
-    get_mock = MagicMockContext()
-    nw._retry_client.get = get_mock
+    retry_client_mock = Mock()
+    retry_client_mock.get = MagicMockContext()
+    retry_client_mock.close = AsyncMock()
+    nw._get_retry_client = Mock(return_value=retry_client_mock)
+
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_GET)
+        nw._get_retry_client.assert_called_once()
         throttler_mock.assert_awaited_once()
-        get_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        retry_client_mock.get.assert_called_once_with(
+            'https://api.etherscan.io/api', params=None, data=None, proxy=None
+        )
         h.assert_called_once()
 
     post_mock = MagicMockContext()
     nw._retry_client.post = post_mock
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_POST)
+        nw._get_retry_client.assert_called_once()
         throttler_mock.assert_awaited()
         post_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
         h.assert_called_once()

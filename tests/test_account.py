@@ -128,6 +128,54 @@ async def test_internal_txs(account):
             sort='wrong',
         )
 
+@pytest.mark.asyncio
+async def test_token_transfers(account):
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
+        await account.token_transfers('addr')
+        mock.assert_called_once_with(
+            params=dict(
+                module='account',
+                action='tokentx',
+                address='addr',
+                startblock=None,
+                endblock=None,
+                sort=None,
+                page=None,
+                offset=None,
+                contractaddress=None
+            )
+        )
+
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
+        await account.token_transfers(
+            address='addr',
+            start_block=1,
+            end_block=2,
+            sort='asc',
+            page=3,
+            offset=4,
+            contract_address='0x123'
+        )
+        mock.assert_called_once_with(
+            params=dict(
+                module='account',
+                action='tokentx',
+                address='addr',
+                startblock=1,
+                endblock=2,
+                sort='asc',
+                page=3,
+                offset=4,
+                contractaddress='0x123'
+            )
+        )
+    with pytest.raises(ValueError):
+        await account.token_transfers(
+            address='addr',
+            sort='wrong',
+        )
+    with pytest.raises(ValueError):
+        await account.token_transfers(start_block=123)
 
 @pytest.mark.asyncio
 async def test_mined_blocks(account):

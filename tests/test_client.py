@@ -1,4 +1,4 @@
-from unittest.mock import patch, AsyncMock, PropertyMock
+from unittest.mock import patch, AsyncMock, PropertyMock, Mock
 
 import pytest
 import pytest_asyncio
@@ -76,3 +76,19 @@ def test_currency(client):
 
         assert client.currency == currency
         m.assert_called_once()
+
+
+def test_api_kind(client):
+    client._url_builder.api_kind = Mock()
+    client._url_builder.api_kind.title = Mock()
+
+    client.api_kind
+
+    client._url_builder.api_kind.assert_not_called()
+    client._url_builder.api_kind.title.assert_called_once()
+
+
+def test_scaner_url(client):
+    url = 'some_url'
+    client._url_builder.BASE_URL = url
+    assert client.scaner_url == url
