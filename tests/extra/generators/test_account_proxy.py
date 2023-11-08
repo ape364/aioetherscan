@@ -1,20 +1,45 @@
 # TODO: write tests
-# from unittest.mock import patch, call, AsyncMock, MagicMock
-#
-# import pytest
-# import pytest_asyncio
-#
-# from aioetherscan import Client
-# from aioetherscan.exceptions import EtherscanClientApiError
-#
-#
-# @pytest_asyncio.fixture
-# async def utils():
-#     c = Client('TestApiKey')
-#     yield c.utils
-#     await c.close()
-#
-#
+from unittest.mock import patch, call, AsyncMock, MagicMock, Mock
+
+import pytest
+import pytest_asyncio
+
+import aioetherscan.modules.extra
+from aioetherscan import Client
+from aioetherscan.exceptions import EtherscanClientApiError
+
+
+@pytest_asyncio.fixture
+async def generators():
+    c = Client('TestApiKey')
+    yield c.extra.generators
+    await c.close()
+
+
+@pytest.mark.asyncio
+async def test_token_transfers(generators):
+    # get_parser_params_mock = Mock()
+    # generators._get_parser_params = get_parser_params_mock
+
+    parse_by_blocks_mock = MagicMock()
+    parse_by_blocks_mock.__aiter__.return_value = range(3)
+    generators._parse_by_blocks = parse_by_blocks_mock
+
+    params = dict(
+        contract_address='contract_addr',
+        address='addr',
+        start_block=1,
+        end_block=2,
+        blocks_limit=10,
+        blocks_limit_divider=20
+    )
+    with patch(
+            'aioetherscan.modules.extra.GeneratorUtils._get_parser_params', new=AsyncMock()
+    ) as get_parser_params_mock:
+        async for t in generators.token_transfers(**params):
+            pass
+            # get_parser_params_mock.assert_not_called()
+
 # def test_generate_intervals(utils):
 #     expected = [(1, 3), (4, 6), (7, 9), (10, 10)]
 #     for i, j in utils._generate_intervals(1, 10, 3):
@@ -187,5 +212,3 @@
 #     with pytest.raises(ValueError, match=exception_message_re):
 #         async for _ in utils.token_transfers_generator(end_block=1):
 #             break
-#
-#
