@@ -12,16 +12,16 @@
 
 ### API modules
 
-Supports all API modules:
+Supports API modules:
 
-* [Accounts](https://etherscan.io/apis#accounts)
-* [Contracts](https://etherscan.io/apis#contracts)
-* [Transactions](https://etherscan.io/apis#transactions)
-* [Blocks](https://etherscan.io/apis#blocks)
-* [Event logs](https://etherscan.io/apis#logs)
-* [GETH/Parity proxy](https://etherscan.io/apis#proxy)
-* [Tokens](https://etherscan.io/apis#tokens)
-* [Stats](https://etherscan.io/apis#stats)
+* [Accounts](https://docs.etherscan.io/api-endpoints/accounts)
+* [Contracts](https://docs.etherscan.io/api-endpoints/contracts)
+* [Transactions](https://docs.etherscan.io/api-endpoints/stats)
+* [Blocks](https://docs.etherscan.io/api-endpoints/blocks)
+* [Event logs](https://docs.etherscan.io/api-endpoints/logs)
+* [GETH/Parity proxy](https://docs.etherscan.io/api-endpoints/geth-parity-proxy)
+* [Tokens](https://docs.etherscan.io/api-endpoints/tokens)
+* [Stats](https://docs.etherscan.io/api-endpoints/stats-1)
 
 Also provides extra modules:
 * `utils` allows to fetch a lot of transactions without timeouts and not getting banned
