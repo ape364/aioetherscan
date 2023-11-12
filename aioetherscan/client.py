@@ -12,6 +12,7 @@ from aioetherscan.modules.extra.utils import Utils
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
+from aioetherscan.modules.token import Token
 from aioetherscan.modules.transaction import Transaction
 from aioetherscan.network import Network, UrlBuilder
 
@@ -30,6 +31,7 @@ class Client:
         self.stats = Stats(self)
         self.logs = Logs(self)
         self.proxy = Proxy(self)
+        self.token = Token(self)
 
         self.utils = Utils(self)
         self.links = LinkHelper(self._url_builder)
