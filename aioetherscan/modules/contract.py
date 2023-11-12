@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Contract(BaseModule):
-    """Contract APIs
+    """Contracts
 
-    https://etherscan.io/apis#contracts
+    https://docs.etherscan.io/api-endpoints/contracts
     """
 
     @property

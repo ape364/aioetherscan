@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Transaction(BaseModule):
-    """Transaction APIs
+    """Transactions
 
-    https://etherscan.io/apis#transactions
+    https://docs.etherscan.io/api-endpoints/stats
     """
 
     @property
