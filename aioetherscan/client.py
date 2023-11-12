@@ -9,6 +9,7 @@ from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
 from aioetherscan.modules.extra.links import LinkHelper
 from aioetherscan.modules.extra.utils import Utils
+from aioetherscan.modules.gas_tracker import GasTracker
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
@@ -32,6 +33,7 @@ class Client:
         self.logs = Logs(self)
         self.proxy = Proxy(self)
         self.token = Token(self)
+        self.gas_tracker = GasTracker(self)
 
         self.utils = Utils(self)
         self.links = LinkHelper(self._url_builder)
