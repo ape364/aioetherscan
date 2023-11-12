@@ -5,10 +5,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Proxy(BaseModule):
-    """Geth/Parity Proxy APIs
+    """Geth/Parity Proxy
 
-    https://etherscan.io/apis#proxy
-    https://github.com/ethereum/wiki/wiki/JSON-RPC
+    https://docs.etherscan.io/api-endpoints/geth-parity-proxy
     """
 
     @property

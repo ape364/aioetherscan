@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Logs(BaseModule):
-    """Event logs
+    """Logs
 
-    https://etherscan.io/apis#logs
+    https://docs.etherscan.io/api-endpoints/logs
     """
 
     _TOPIC_OPERATORS = ('and', 'or')

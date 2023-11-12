@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Block(BaseModule):
-    """Block APIs
+    """Blocks
 
-    https://etherscan.io/apis#blocks
+    https://docs.etherscan.io/api-endpoints/blocks
     """
 
     _CLOSEST_VALUEST = (

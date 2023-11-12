@@ -5,10 +5,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Account(BaseModule):
-    """Account & token APIs
+    """Accounts
 
-    https://etherscan.io/apis#accounts
-    https://etherscan.io/apis#tokens
+    https://docs.etherscan.io/api-endpoints/accounts
     """
 
     _SORT_ORDERS = (

@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Stats(BaseModule):
-    """General stats
+    """Stats
 
-    https://etherscan.io/apis#stats
+    https://docs.etherscan.io/api-endpoints/stats-1
     """
 
     @property

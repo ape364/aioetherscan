@@ -5,9 +5,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Token(BaseModule):
-    """Token
+    """Tokens
 
-    https://etherscan.io/apis#token
+    https://docs.etherscan.io/api-endpoints/tokens
     """
 
     @property
