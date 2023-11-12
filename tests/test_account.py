@@ -262,26 +262,3 @@ async def test_token_balance(account):
                 tag='0x7b',
             )
         )
-
-
-def test_check(account):
-    assert account._check('a', ('a', 'b')) == 'a'
-    assert account._check('A', ('a', 'b')) == 'A'
-    with pytest.raises(ValueError):
-        account._check('c', ('a', 'b'))
-    with pytest.raises(ValueError):
-        account._check('C', ('a', 'b'))
-
-
-def test_check_sort_direction(account):
-    assert account._check_sort_direction('asc') == 'asc'
-    assert account._check_sort_direction('desc') == 'desc'
-    with pytest.raises(ValueError):
-        account._check_sort_direction('wrong')
-
-
-def test_check_blocktype(account):
-    assert account._check_blocktype('blocks') == 'blocks'
-    assert account._check_blocktype('uncles') == 'uncles'
-    with pytest.raises(ValueError):
-        account._check_blocktype('wrong')

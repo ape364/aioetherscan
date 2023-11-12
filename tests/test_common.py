@@ -2,7 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from aioetherscan.common import check_hex, check_tag
+from aioetherscan.common import check_hex, check_tag, check_value, check_sort_direction, check_blocktype
 
 
 def test_check_hex():
@@ -21,3 +21,26 @@ def test_check_tag():
     with patch('aioetherscan.common.check_hex', new=Mock()) as mock:
         check_tag(123)
         mock.assert_called_once_with(123)
+
+
+def test_check():
+    assert check_value('a', ('a', 'b')) == 'a'
+    assert check_value('A', ('a', 'b')) == 'A'
+    with pytest.raises(ValueError):
+        check_value('c', ('a', 'b'))
+    with pytest.raises(ValueError):
+        check_value('C', ('a', 'b'))
+
+
+def test_check_sort_direction():
+    assert check_sort_direction('asc') == 'asc'
+    assert check_sort_direction('desc') == 'desc'
+    with pytest.raises(ValueError):
+        check_sort_direction('wrong')
+
+
+def test_check_blocktype():
+    assert check_blocktype('blocks') == 'blocks'
+    assert check_blocktype('uncles') == 'uncles'
+    with pytest.raises(ValueError):
+        check_blocktype('wrong')

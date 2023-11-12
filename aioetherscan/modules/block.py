@@ -1,5 +1,6 @@
 from typing import Dict
 
+from aioetherscan.common import check_closest_value
 from aioetherscan.modules.base import BaseModule
 
 
@@ -8,11 +9,6 @@ class Block(BaseModule):
 
     https://docs.etherscan.io/api-endpoints/blocks
     """
-
-    _CLOSEST_VALUEST = (
-        'before',  # ascending order
-        'after'  # descending order
-    )
 
     @property
     def _module(self) -> str:
@@ -37,8 +33,5 @@ class Block(BaseModule):
         return await self._get(
             action='getblocknobytime',
             timestamp=ts,
-            closest=self._check_closest_value(closest)
+            closest=check_closest_value(closest)
         )
-
-    def _check_closest_value(self, closest: str) -> str:
-        return self._check(closest, self._CLOSEST_VALUEST)

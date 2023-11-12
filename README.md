@@ -12,7 +12,7 @@
 
 ### API modules
 
-Supports API modules:
+Supports all API modules:
 
 * [Accounts](https://docs.etherscan.io/api-endpoints/accounts)
 * [Contracts](https://docs.etherscan.io/api-endpoints/contracts)
@@ -21,6 +21,7 @@ Supports API modules:
 * [Event logs](https://docs.etherscan.io/api-endpoints/logs)
 * [GETH/Parity proxy](https://docs.etherscan.io/api-endpoints/geth-parity-proxy)
 * [Tokens](https://docs.etherscan.io/api-endpoints/tokens)
+* [Gas Tracker](https://docs.etherscan.io/api-endpoints/gas-tracker)
 * [Stats](https://docs.etherscan.io/api-endpoints/stats-1)
 
 Also provides extra modules:

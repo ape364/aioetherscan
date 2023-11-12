@@ -1,6 +1,6 @@
 from typing import Iterable, Optional, List, Dict
 
-from aioetherscan.common import check_tag
+from aioetherscan.common import check_tag, check_sort_direction, check_blocktype
 from aioetherscan.modules.base import BaseModule
 
 
@@ -9,16 +9,6 @@ class Account(BaseModule):
 
     https://docs.etherscan.io/api-endpoints/accounts
     """
-
-    _SORT_ORDERS = (
-        'asc',  # ascending order
-        'desc'  # descending order
-    )
-
-    _BLOCK_TYPES = (
-        'blocks',  # full blocks only
-        'uncles'  # uncle blocks only
-    )
 
     @property
     def _module(self) -> str:
@@ -55,7 +45,7 @@ class Account(BaseModule):
             address=address,
             startblock=start_block,
             endblock=end_block,
-            sort=self._check_sort_direction(sort),
+            sort=check_sort_direction(sort),
             page=page,
             offset=offset
         )
@@ -76,7 +66,7 @@ class Account(BaseModule):
             address=address,
             startblock=start_block,
             endblock=end_block,
-            sort=self._check_sort_direction(sort),
+            sort=check_sort_direction(sort),
             page=page,
             offset=offset,
             txhash=txhash
@@ -101,7 +91,7 @@ class Account(BaseModule):
             address=address,
             startblock=start_block,
             endblock=end_block,
-            sort=self._check_sort_direction(sort),
+            sort=check_sort_direction(sort),
             page=page,
             offset=offset,
             contractaddress=contract_address
@@ -118,7 +108,7 @@ class Account(BaseModule):
         return await self._get(
             action='getminedblocks',
             address=address,
-            blocktype=self._check_blocktype(blocktype),
+            blocktype=check_blocktype(blocktype),
             page=page,
             offset=offset
         )
@@ -131,9 +121,3 @@ class Account(BaseModule):
             contractaddress=contract_address,
             tag=check_tag(tag)
         )
-
-    def _check_sort_direction(self, sort: str) -> str:
-        return self._check(sort, self._SORT_ORDERS)
-
-    def _check_blocktype(self, blocktype: str) -> str:
-        return self._check(blocktype, self._BLOCK_TYPES)
