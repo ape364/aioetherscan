@@ -54,9 +54,9 @@ async def test_daily_average_gas_limit(gas_tracker):
                 enddate='2023-11-13',
                 sort=None
             ))
-    # TODO
-    # with pytest.raises(ValueError):
-    #     await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
+
+    with pytest.raises(ValueError):
+        await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
 
 
 @pytest.mark.asyncio
@@ -85,9 +85,9 @@ async def test_daily_total_gas_used(gas_tracker):
                 enddate='2023-11-13',
                 sort=None
             ))
-    # TODO
-    # with pytest.raises(ValueError):
-    #     await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
+
+    with pytest.raises(ValueError):
+        await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
 
 
 @pytest.mark.asyncio
@@ -116,6 +116,6 @@ async def test_daily_average_gas_price(gas_tracker):
                 enddate='2023-11-13',
                 sort=None
             ))
-    # TODO
-    # with pytest.raises(ValueError):
-    #     await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
+
+    with pytest.raises(ValueError):
+        await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
