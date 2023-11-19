@@ -82,12 +82,65 @@ class Account(BaseModule):
             page: Optional[int] = None,
             offset: Optional[int] = None,
     ) -> List[Dict]:
-        """Get a list of "ERC20 - Token Transfer Events" by Address."""
+        """Get a list of "ERC20 - Token Transfer Events" by Address"""
+        # todo: refactor
         if not address and not contract_address:
             raise ValueError('At least one of address or contract_address must be specified.')
 
         return await self._get(
             action='tokentx',
+            address=address,
+            startblock=start_block,
+            endblock=end_block,
+            sort=check_sort_direction(sort),
+            page=page,
+            offset=offset,
+            contractaddress=contract_address
+        )
+
+    async def token_transfers_erc721(
+            self,
+            address: Optional[str] = None,
+            contract_address: Optional[str] = None,
+            start_block: Optional[int] = None,
+            end_block: Optional[int] = None,
+            sort: Optional[str] = None,
+            page: Optional[int] = None,
+            offset: Optional[int] = None,
+    ) -> List[Dict]:
+        # todo: refactor
+        """Get a list of 'ERC721 - Token Transfer Events' by Address"""
+        if not address and not contract_address:
+            raise ValueError('At least one of address or contract_address must be specified.')
+
+        return await self._get(
+            action='tokennfttx',
+            address=address,
+            startblock=start_block,
+            endblock=end_block,
+            sort=check_sort_direction(sort),
+            page=page,
+            offset=offset,
+            contractaddress=contract_address
+        )
+
+    async def token_transfers_erc1155(
+            self,
+            address: Optional[str] = None,
+            contract_address: Optional[str] = None,
+            start_block: Optional[int] = None,
+            end_block: Optional[int] = None,
+            sort: Optional[str] = None,
+            page: Optional[int] = None,
+            offset: Optional[int] = None,
+    ) -> List[Dict]:
+        """Get a list of 'ERC1155 - Token Transfer Events' by Address"""
+        # todo: refactor
+        if not address and not contract_address:
+            raise ValueError('At least one of address or contract_address must be specified.')
+
+        return await self._get(
+            action='token1155tx',
             address=address,
             startblock=start_block,
             endblock=end_block,
@@ -104,7 +157,7 @@ class Account(BaseModule):
             page: Optional[int] = None,
             offset: Optional[int] = None
     ) -> List:
-        """Get list of Blocks Mined by Address."""
+        """Get list of Blocks Validated by Address"""
         return await self._get(
             action='getminedblocks',
             address=address,
@@ -113,11 +166,32 @@ class Account(BaseModule):
             offset=offset
         )
 
-    async def token_balance(self, address: str, contract_address: str, tag: str = 'latest') -> str:
-        """Get ERC20-Token Account Balance for TokenContractAddress."""
+    async def beacon_chain_withdrawals(
+            self,
+            address: str,
+            start_block: Optional[int] = None,
+            end_block: Optional[int] = None,
+            sort: Optional[str] = None,
+            page: Optional[int] = None,
+            offset: Optional[int] = None,
+    ) -> List[Dict]:
+        """Get Beacon Chain Withdrawals by Address and Block Range"""
+        # todo: refactor
         return await self._get(
-            action='tokenbalance',
+            action='txsBeaconWithdrawal',
             address=address,
-            contractaddress=contract_address,
-            tag=check_tag(tag)
+            startblock=start_block,
+            endblock=end_block,
+            sort=check_sort_direction(sort),
+            page=page,
+            offset=offset,
+        )
+
+    async def account_balance_by_blockno(self, address: str, blockno: int) -> str:
+        """Get Historical Ether Balance for a Single Address By BlockNo"""
+        return await self._get(
+            module='account',
+            action='balancehistory',
+            address=address,
+            blockno=blockno
         )
