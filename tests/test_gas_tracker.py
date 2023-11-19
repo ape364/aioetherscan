@@ -87,7 +87,7 @@ async def test_daily_total_gas_used(gas_tracker):
             ))
 
     with pytest.raises(ValueError):
-        await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
+        await gas_tracker.daily_total_gas_used(start_date, end_date, 'wrong')
 
 
 @pytest.mark.asyncio
@@ -118,4 +118,4 @@ async def test_daily_average_gas_price(gas_tracker):
             ))
 
     with pytest.raises(ValueError):
-        await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
+        await gas_tracker.daily_average_gas_price(start_date, end_date, 'wrong')
