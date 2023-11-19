@@ -1,4 +1,5 @@
-from typing import Union, Tuple
+from datetime import date
+from typing import Union, Tuple, Dict
 
 
 def check_value(value: str, values: Tuple[str, ...]) -> str:
@@ -81,3 +82,13 @@ def check_token_standard(token_standard: str) -> str:
     )
 
     return check_value(token_standard, _TOKEN_STANDARDS)
+
+
+def get_daily_stats_params(action: str, start_date: date, end_date: date, sort: str) -> Dict:
+    return dict(
+        module='stats',
+        action=action,
+        startdate=start_date.isoformat(),
+        enddate=end_date.isoformat(),
+        sort=check_sort_direction(sort)
+    )
