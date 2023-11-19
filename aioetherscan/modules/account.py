@@ -1,6 +1,6 @@
 from typing import Iterable, Optional, List, Dict
 
-from aioetherscan.common import check_tag, check_sort_direction, check_blocktype
+from aioetherscan.common import check_tag, check_sort_direction, check_blocktype, check_token_standard
 from aioetherscan.modules.base import BaseModule
 
 
@@ -81,66 +81,21 @@ class Account(BaseModule):
             sort: Optional[str] = None,
             page: Optional[int] = None,
             offset: Optional[int] = None,
+            token_standard: str = 'erc20'
     ) -> List[Dict]:
         """Get a list of "ERC20 - Token Transfer Events" by Address"""
-        # todo: refactor
         if not address and not contract_address:
             raise ValueError('At least one of address or contract_address must be specified.')
 
-        return await self._get(
-            action='tokentx',
-            address=address,
-            startblock=start_block,
-            endblock=end_block,
-            sort=check_sort_direction(sort),
-            page=page,
-            offset=offset,
-            contractaddress=contract_address
+        token_standard = check_token_standard(token_standard)
+        actions = dict(
+            erc20='tokentx',
+            erc721='tokennfttx',
+            erc1155='token1155tx'
         )
 
-    async def token_transfers_erc721(
-            self,
-            address: Optional[str] = None,
-            contract_address: Optional[str] = None,
-            start_block: Optional[int] = None,
-            end_block: Optional[int] = None,
-            sort: Optional[str] = None,
-            page: Optional[int] = None,
-            offset: Optional[int] = None,
-    ) -> List[Dict]:
-        # todo: refactor
-        """Get a list of 'ERC721 - Token Transfer Events' by Address"""
-        if not address and not contract_address:
-            raise ValueError('At least one of address or contract_address must be specified.')
-
         return await self._get(
-            action='tokennfttx',
-            address=address,
-            startblock=start_block,
-            endblock=end_block,
-            sort=check_sort_direction(sort),
-            page=page,
-            offset=offset,
-            contractaddress=contract_address
-        )
-
-    async def token_transfers_erc1155(
-            self,
-            address: Optional[str] = None,
-            contract_address: Optional[str] = None,
-            start_block: Optional[int] = None,
-            end_block: Optional[int] = None,
-            sort: Optional[str] = None,
-            page: Optional[int] = None,
-            offset: Optional[int] = None,
-    ) -> List[Dict]:
-        """Get a list of 'ERC1155 - Token Transfer Events' by Address"""
-        # todo: refactor
-        if not address and not contract_address:
-            raise ValueError('At least one of address or contract_address must be specified.')
-
-        return await self._get(
-            action='token1155tx',
+            action=actions.get(token_standard),
             address=address,
             startblock=start_block,
             endblock=end_block,

@@ -71,3 +71,13 @@ def check_sync_mode(sync_mode: str) -> str:
     )
 
     return check_value(sync_mode, _SYNC_MODES)
+
+
+def check_token_standard(token_standard: str) -> str:
+    _TOKEN_STANDARDS = (
+        'erc20',
+        'erc721',
+        'erc1155',
+    )
+
+    return check_value(token_standard, _TOKEN_STANDARDS)

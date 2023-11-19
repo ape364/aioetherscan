@@ -130,7 +130,15 @@ async def test_internal_txs(account):
 
 
 @pytest.mark.asyncio
-async def test_token_transfers(account):
+@pytest.mark.parametrize(
+    'token_standard,expected_action',
+    [
+        ('erc20', 'tokentx'),
+        ('erc721', 'tokennfttx'),
+        ('erc1155', 'token1155tx'),
+    ]
+)
+async def test_token_transfers(account, token_standard, expected_action):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_transfers('addr')
         mock.assert_called_once_with(
@@ -170,6 +178,32 @@ async def test_token_transfers(account):
                 contractaddress='0x123'
             )
         )
+
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
+        await account.token_transfers(
+            address='addr',
+            start_block=1,
+            end_block=2,
+            sort='asc',
+            page=3,
+            offset=4,
+            contract_address='0x123',
+            token_standard=token_standard
+        )
+        mock.assert_called_once_with(
+            params=dict(
+                module='account',
+                action=expected_action,
+                address='addr',
+                startblock=1,
+                endblock=2,
+                sort='asc',
+                page=3,
+                offset=4,
+                contractaddress='0x123'
+            )
+        )
+
     with pytest.raises(ValueError):
         await account.token_transfers(
             address='addr',
@@ -177,107 +211,6 @@ async def test_token_transfers(account):
         )
     with pytest.raises(ValueError):
         await account.token_transfers(start_block=123)
-
-
-@pytest.mark.asyncio
-async def test_token_transfers_erc721(account):
-    # todo: refactor
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_transfers_erc721('addr')
-        mock.assert_called_once_with(
-            params=dict(
-                module='account',
-                action='tokennfttx',
-                address='addr',
-                startblock=None,
-                endblock=None,
-                sort=None,
-                page=None,
-                offset=None,
-                contractaddress=None
-            )
-        )
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_transfers_erc721(
-            address='addr',
-            start_block=1,
-            end_block=2,
-            sort='asc',
-            page=3,
-            offset=4,
-            contract_address='0x123'
-        )
-        mock.assert_called_once_with(
-            params=dict(
-                module='account',
-                action='tokennfttx',
-                address='addr',
-                startblock=1,
-                endblock=2,
-                sort='asc',
-                page=3,
-                offset=4,
-                contractaddress='0x123'
-            )
-        )
-    with pytest.raises(ValueError):
-        await account.token_transfers_erc721(
-            address='addr',
-            sort='wrong',
-        )
-    with pytest.raises(ValueError):
-        await account.token_transfers_erc721(start_block=123)
-
-
-@pytest.mark.asyncio
-async def test_token_transfers_erc1155(account):
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_transfers_erc1155('addr')
-        mock.assert_called_once_with(
-            params=dict(
-                module='account',
-                action='token1155tx',
-                address='addr',
-                startblock=None,
-                endblock=None,
-                sort=None,
-                page=None,
-                offset=None,
-                contractaddress=None
-            )
-        )
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_transfers_erc1155(
-            address='addr',
-            start_block=1,
-            end_block=2,
-            sort='asc',
-            page=3,
-            offset=4,
-            contract_address='0x123'
-        )
-        mock.assert_called_once_with(
-            params=dict(
-                module='account',
-                action='token1155tx',
-                address='addr',
-                startblock=1,
-                endblock=2,
-                sort='asc',
-                page=3,
-                offset=4,
-                contractaddress='0x123'
-            )
-        )
-    with pytest.raises(ValueError):
-        await account.token_transfers_erc1155(
-            address='addr',
-            sort='wrong',
-        )
-    with pytest.raises(ValueError):
-        await account.token_transfers_erc1155(start_block=123)
 
 
 @pytest.mark.asyncio
@@ -342,6 +275,8 @@ async def test_beacon_chain_withdrawals(account):
             address='addr',
             sort='wrong',
         )
+
+
 @pytest.mark.asyncio
 async def test_account_balance_by_blockno(account):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
