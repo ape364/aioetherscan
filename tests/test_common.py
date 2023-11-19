@@ -2,7 +2,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from aioetherscan.common import check_hex, check_tag, check_value, check_sort_direction, check_blocktype
+from aioetherscan.common import check_hex, check_tag, check_value, check_sort_direction, check_blocktype, \
+    check_client_type, check_sync_mode
 
 
 def test_check_hex():
@@ -44,3 +45,17 @@ def test_check_blocktype():
     assert check_blocktype('uncles') == 'uncles'
     with pytest.raises(ValueError):
         check_blocktype('wrong')
+
+
+def test_check_client_type():
+    assert check_client_type('geth') == 'geth'
+    assert check_client_type('parity') == 'parity'
+    with pytest.raises(ValueError):
+        check_client_type('wrong')
+
+
+def test_check_sync_mode():
+    assert check_sync_mode('default') == 'default'
+    assert check_sync_mode('archive') == 'archive'
+    with pytest.raises(ValueError):
+        check_sync_mode('wrong')

@@ -47,9 +47,27 @@ def check_blocktype(blocktype: str) -> str:
 
 
 def check_closest_value(closest_value: str) -> str:
-    _CLOSEST_VALUEST = (
+    _CLOSEST_VALUES = (
         'before',  # ascending order
         'after'  # descending order
     )
 
-    return check_value(closest_value, _CLOSEST_VALUEST)
+    return check_value(closest_value, _CLOSEST_VALUES)
+
+
+def check_client_type(client_type: str) -> str:
+    _CLIENT_TYPES = (
+        'geth',
+        'parity',
+    )
+
+    return check_value(client_type, _CLIENT_TYPES)
+
+
+def check_sync_mode(sync_mode: str) -> str:
+    _SYNC_MODES = (
+        'default',
+        'archive',
+    )
+
+    return check_value(sync_mode, _SYNC_MODES)
