@@ -137,4 +137,3 @@ pip-selfcheck.json
 .idea/
 test.py
 tst.py
-.pytest_cache/
