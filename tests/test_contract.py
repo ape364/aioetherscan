@@ -125,6 +125,8 @@ async def test_verify_proxy_contract(contract):
                 expectedimplementation='0x54321',
             )
         )
+
+
 @pytest.mark.asyncio
 async def test_check_proxy_contract_verification(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:

@@ -46,6 +46,7 @@ async def test_block_number_by_ts(block):
             closest='wrong',
         )
 
+
 @pytest.mark.asyncio
 async def test_daily_average_block_size(block):
     start_date = date(2023, 11, 12)
@@ -75,6 +76,7 @@ async def test_daily_average_block_size(block):
 
     with pytest.raises(ValueError):
         await block.daily_average_block_size(start_date, end_date, 'wrong')
+
 
 @pytest.mark.asyncio
 async def test_daily_block_count(block):
@@ -106,6 +108,7 @@ async def test_daily_block_count(block):
     with pytest.raises(ValueError):
         await block.daily_block_count(start_date, end_date, 'wrong')
 
+
 @pytest.mark.asyncio
 async def test_daily_block_rewards(block):
     start_date = date(2023, 11, 12)
@@ -136,6 +139,7 @@ async def test_daily_block_rewards(block):
     with pytest.raises(ValueError):
         await block.daily_block_rewards(start_date, end_date, 'wrong')
 
+
 @pytest.mark.asyncio
 async def test_daily_average_time_for_a_block(block):
     start_date = date(2023, 11, 12)
@@ -165,6 +169,7 @@ async def test_daily_average_time_for_a_block(block):
 
     with pytest.raises(ValueError):
         await block.daily_average_time_for_a_block(start_date, end_date, 'wrong')
+
 
 @pytest.mark.asyncio
 async def test_daily_uncle_block_count(block):

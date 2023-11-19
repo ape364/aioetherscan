@@ -8,7 +8,7 @@ class BaseModule(ABC):
     @property
     @abstractmethod
     def _module(self) -> str:
-        '''Returns API module name.'''
+        """Returns API module name."""
 
     async def _get(self, **params):
         return await self._client._http.get(params={**dict(module=self._module), **params})

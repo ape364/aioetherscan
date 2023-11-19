@@ -89,6 +89,7 @@ def test_invalid_api_kind():
         UrlBuilder(apikey(), 'wrong', 'main')
     assert 'Incorrect api_kind' in str(exception.value)
 
+
 @pytest.mark.parametrize(
     'api_kind,expected',
     [
