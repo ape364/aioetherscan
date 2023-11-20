@@ -1,3 +1,5 @@
+from typing import Dict, List
+
 from aioetherscan.common import check_tag
 from aioetherscan.modules.base import BaseModule
 
@@ -58,8 +60,8 @@ class Token(BaseModule):
         contract_address: str,
         page: int = None,
         offset: int = None,
-    ) -> list[dict]:
-        """Get Token Holder list by Contract Address"""
+    ) -> List[Dict]:
+        """Get Token Holder List by Contract Address"""
         return await self._get(
             action='tokenholderlist', contractaddress=contract_address, page=page, offset=offset
         )
@@ -67,7 +69,7 @@ class Token(BaseModule):
     async def token_info(
         self,
         contract_address: str = None,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """Get Token Info by ContractAddress"""
         return await self._get(
             action='tokeninfo',
@@ -79,7 +81,7 @@ class Token(BaseModule):
         address: str,
         page: int = None,
         offset: int = None,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """Get Address ERC20 Token Holding"""
         return await self._get(
             module='account',
@@ -94,7 +96,7 @@ class Token(BaseModule):
         address: str,
         page: int = None,
         offset: int = None,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """Get Address ERC721 Token Holding"""
         return await self._get(
             module='account',
@@ -110,7 +112,7 @@ class Token(BaseModule):
         contract_address: str,
         page: int = None,
         offset: int = None,
-    ) -> list[dict]:
+    ) -> List[Dict]:
         """Get Address ERC721 Token Inventory By Contract Address"""
         return await self._get(
             module='account',

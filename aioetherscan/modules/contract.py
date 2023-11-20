@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Dict, List
 
 from aioetherscan.modules.base import BaseModule
 
@@ -17,11 +17,11 @@ class Contract(BaseModule):
         """Get Contract ABI for Verified Contract Source Codes"""
         return await self._get(action='getabi', address=address)
 
-    async def contract_source_code(self, address: str) -> list[dict]:
+    async def contract_source_code(self, address: str) -> List[Dict]:
         """Get Contract Source Code for Verified Contract Source Codes"""
         return await self._get(action='getsourcecode', address=address)
 
-    async def contract_creation(self, addresses: Iterable[str]) -> list[dict]:
+    async def contract_creation(self, addresses: Iterable[str]) -> List[Dict]:
         """Get Contract Creator and Creation Tx Hash"""
         return await self._get(action='getcontractcreation', contractaddresses=','.join(addresses))
 
@@ -34,7 +34,7 @@ class Contract(BaseModule):
         optimization_used: bool = False,
         runs: int = 200,
         constructor_arguements: str = None,
-        libraries: dict[str, str] = None,
+        libraries: Dict[str, str] = None,
     ) -> str:
         """Submits a contract source code to Etherscan for verification."""
         return await self._post(
@@ -54,9 +54,7 @@ class Contract(BaseModule):
         """Check Source code verification submission status"""
         return await self._get(action='checkverifystatus', guid=guid)
 
-    async def verify_proxy_contract(
-        self, address: str, expected_implementation: str | None = None
-    ) -> str:
+    async def verify_proxy_contract(self, address: str, expected_implementation: str = None) -> str:
         """Submits a proxy contract source code to Etherscan for verification."""
         return await self._post(
             module='contract',
@@ -70,7 +68,7 @@ class Contract(BaseModule):
         return await self._get(action='checkproxyverification', guid=guid)
 
     @staticmethod
-    def _parse_libraries(libraries: dict[str, str]) -> dict[str, str]:
+    def _parse_libraries(libraries: Dict[str, str]) -> Dict[str, str]:
         return dict(
             part
             for i, (name, address) in enumerate(libraries.items(), start=1)

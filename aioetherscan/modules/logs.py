@@ -1,3 +1,5 @@
+from typing import Union, Optional, List, Dict
+
 from aioetherscan.modules.base import BaseModule
 
 
@@ -16,12 +18,12 @@ class Logs(BaseModule):
 
     async def get_logs(
         self,
-        from_block: int | str,
-        to_block: int | str,
+        from_block: Union[int, str],
+        to_block: Union[int, str],
         address: str,
-        topics: list[str],
-        topic_operators: list[str] | None = None,
-    ) -> list[dict]:
+        topics: List[str],
+        topic_operators: Optional[List[str]] = None,
+    ) -> List[Dict]:
         """[Beta] The Event Log API was designed to provide an alternative to the native eth_getLogs
 
         https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getlogs.
@@ -34,14 +36,14 @@ class Logs(BaseModule):
             **self._fill_topics(topics, topic_operators),
         )
 
-    def _check_block(self, block: int | str) -> int | str:
+    def _check_block(self, block: Union[str, int]) -> Union[str, int]:
         if isinstance(block, int):
             return block
         if block in self._BLOCKS:
             return block
         raise ValueError(f'Invalid value {block!r}, only integers or {self._BLOCKS} are supported.')
 
-    def _fill_topics(self, topics: list[str], topic_operators: list[str]):
+    def _fill_topics(self, topics: List[str], topic_operators: List[str]):
         if len(topics) > 1:
             self._check_topics(topics, topic_operators)
 
@@ -54,7 +56,7 @@ class Logs(BaseModule):
         else:
             return {'topic0': topics[0]}
 
-    def _check_topics(self, topics: list[str], topic_operators: list[str]) -> None:
+    def _check_topics(self, topics: List[str], topic_operators: List[str]) -> None:
         if not topic_operators:
             raise ValueError('Topic operators are required when more than 1 topic passed.')
 
