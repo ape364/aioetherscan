@@ -30,3 +30,9 @@ asyncio_mode = "auto"
 
 [tool.coverage.run]
 relative_files = true
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
