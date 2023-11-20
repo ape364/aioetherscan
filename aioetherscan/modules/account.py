@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, List, Dict
+from typing import Iterable
 
 from aioetherscan.common import (
     check_tag,
@@ -23,7 +23,7 @@ class Account(BaseModule):
         """Get Ether Balance for a single Address."""
         return await self._get(action='balance', address=address, tag=check_tag(tag))
 
-    async def balances(self, addresses: Iterable[str], tag: str = 'latest') -> List[Dict]:
+    async def balances(self, addresses: Iterable[str], tag: str = 'latest') -> list[dict]:
         """Get Ether Balance for multiple Addresses in a single call."""
         return await self._get(
             action='balancemulti', address=','.join(addresses), tag=check_tag(tag)
@@ -32,12 +32,12 @@ class Account(BaseModule):
     async def normal_txs(
         self,
         address: str,
-        start_block: Optional[int] = None,
-        end_block: Optional[int] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[Dict]:
+        start_block: int | None = None,
+        end_block: int | None = None,
+        sort: str | None = None,
+        page: int | None = None,
+        offset: int | None = None,
+    ) -> list[dict]:
         """Get a list of 'Normal' Transactions By Address."""
         return await self._get(
             action='txlist',
@@ -52,13 +52,13 @@ class Account(BaseModule):
     async def internal_txs(
         self,
         address: str,
-        start_block: Optional[int] = None,
-        end_block: Optional[int] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        offset: Optional[int] = None,
-        txhash: Optional[str] = None,
-    ) -> List[Dict]:
+        start_block: int | None = None,
+        end_block: int | None = None,
+        sort: str | None = None,
+        page: int | None = None,
+        offset: int | None = None,
+        txhash: str | None = None,
+    ) -> list[dict]:
         """Get a list of 'Internal' Transactions by Address or Transaction Hash."""
         return await self._get(
             action='txlistinternal',
@@ -73,15 +73,15 @@ class Account(BaseModule):
 
     async def token_transfers(
         self,
-        address: Optional[str] = None,
-        contract_address: Optional[str] = None,
-        start_block: Optional[int] = None,
-        end_block: Optional[int] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        offset: Optional[int] = None,
+        address: str | None = None,
+        contract_address: str | None = None,
+        start_block: int | None = None,
+        end_block: int | None = None,
+        sort: str | None = None,
+        page: int | None = None,
+        offset: int | None = None,
         token_standard: str = 'erc20',
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """Get a list of "ERC20 - Token Transfer Events" by Address"""
         if not address and not contract_address:
             raise ValueError('At least one of address or contract_address must be specified.')
@@ -104,9 +104,9 @@ class Account(BaseModule):
         self,
         address: str,
         blocktype: str = 'blocks',
-        page: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List:
+        page: int | None = None,
+        offset: int | None = None,
+    ) -> list:
         """Get list of Blocks Validated by Address"""
         return await self._get(
             action='getminedblocks',
@@ -119,12 +119,12 @@ class Account(BaseModule):
     async def beacon_chain_withdrawals(
         self,
         address: str,
-        start_block: Optional[int] = None,
-        end_block: Optional[int] = None,
-        sort: Optional[str] = None,
-        page: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[Dict]:
+        start_block: int | None = None,
+        end_block: int | None = None,
+        sort: str | None = None,
+        page: int | None = None,
+        offset: int | None = None,
+    ) -> list[dict]:
         """Get Beacon Chain Withdrawals by Address and Block Range"""
         return await self._get(
             action='txsBeaconWithdrawal',

@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop
-from typing import Union, Dict, List, AsyncContextManager, Optional
+from typing import AsyncContextManager
 
 import aiohttp
 from aiohttp import ClientTimeout
@@ -23,11 +23,11 @@ class Network:
     def __init__(
         self,
         url_builder: UrlBuilder,
-        loop: Optional[AbstractEventLoop],
-        timeout: Optional[ClientTimeout],
-        proxy: Optional[str],
-        throttler: Optional[AsyncContextManager],
-        retry_options: Optional[RetryOptionsBase],
+        loop: AbstractEventLoop | None,
+        timeout: ClientTimeout | None,
+        proxy: str | None,
+        throttler: AsyncContextManager | None,
+        retry_options: RetryOptionsBase | None,
     ) -> None:
         self._url_builder = url_builder
 
@@ -48,10 +48,10 @@ class Network:
         if self._retry_client is not None:
             await self._retry_client.close()
 
-    async def get(self, params: Dict = None) -> Union[Dict, List, str]:
+    async def get(self, params: dict | None = None) -> dict | list | str:
         return await self._request(METH_GET, params=self._url_builder.filter_and_sign(params))
 
-    async def post(self, data: Dict = None) -> Union[Dict, List, str]:
+    async def post(self, data: dict | None = None) -> dict | list | str:
         return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
     def _get_retry_client(self) -> RetryClient:
@@ -63,8 +63,8 @@ class Network:
         return RetryClient(client_session=session, retry_options=self._retry_options)
 
     async def _request(
-        self, method: str, data: Dict = None, params: Dict = None
-    ) -> Union[Dict, List, str]:
+        self, method: str, data: dict = None, params: dict = None
+    ) -> dict | list | str:
         if self._retry_client is None:
             self._retry_client = self._get_retry_client()
         session_method = getattr(self._retry_client, method.lower())
@@ -77,7 +77,7 @@ class Network:
                 )
                 return await self._handle_response(response)
 
-    async def _handle_response(self, response: aiohttp.ClientResponse) -> Union[Dict, list, str]:
+    async def _handle_response(self, response: aiohttp.ClientResponse) -> dict | list | str:
         try:
             response_json = await response.json()
         except aiohttp.ContentTypeError:
@@ -90,7 +90,7 @@ class Network:
             return response_json['result']
 
     @staticmethod
-    def _raise_if_error(response_json: Dict):
+    def _raise_if_error(response_json: dict):
         if 'status' in response_json and response_json['status'] != '1':
             message, result = response_json.get('message'), response_json.get('result')
             raise EtherscanClientApiError(message, result)

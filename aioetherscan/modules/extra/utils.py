@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from typing import Tuple, Dict, List, Iterator, AsyncIterator, Optional
+from typing import Iterator, AsyncIterator
 
 from aioetherscan.exceptions import EtherscanClientApiError
 
@@ -21,7 +21,7 @@ class Utils:
         offset: int = 3,
         start_block: int = 0,
         end_block: int = None,
-    ) -> AsyncIterator[Dict]:
+    ) -> AsyncIterator[dict]:
         if end_block is None:
             end_block = int(await self._client.proxy.block_number(), 16)
 
@@ -44,7 +44,7 @@ class Utils:
         offset: int = 3,
         start_block: int = 0,
         end_block: int = None,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         kwargs = {k: v for k, v in locals().items() if k != 'self' and not k.startswith('_')}
         return [t async for t in self.token_transfers_generator(**kwargs)]
 
@@ -61,7 +61,7 @@ class Utils:
         else:
             return True if response else False
 
-    async def get_contract_creator(self, contract_address: str) -> Optional[str]:
+    async def get_contract_creator(self, contract_address: str) -> str | None:
         try:
             response = await self._client.account.internal_txs(
                 address=contract_address, start_block=1, page=1, offset=1
@@ -90,7 +90,7 @@ class Utils:
         offset: int,
         address: str = None,
         contract_address: str = None,
-    ) -> AsyncIterator[Dict]:
+    ) -> AsyncIterator[dict]:
         page = 1
 
         while True:
@@ -115,6 +115,6 @@ class Utils:
     @staticmethod
     def _generate_intervals(
         from_number: int, to_number: int, count: int
-    ) -> Iterator[Tuple[int, int]]:
+    ) -> Iterator[tuple[int, int]]:
         for i in range(from_number, to_number + 1, count):
             yield i, min(i + count - 1, to_number)

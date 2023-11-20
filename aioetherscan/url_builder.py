@@ -1,4 +1,3 @@
-from typing import Dict, Optional
 from urllib.parse import urlunsplit, urljoin
 
 
@@ -51,7 +50,7 @@ class UrlBuilder:
     def get_link(self, path: str) -> str:
         return urljoin(self.BASE_URL, path)
 
-    def _build_url(self, prefix: Optional[str], path: str = '') -> str:
+    def _build_url(self, prefix: str | None = None, path: str = '') -> str:
         netloc = self._base_netloc if prefix is None else f'{prefix}.{self._base_netloc}'
         return urlunsplit(('https', netloc, path, '', ''))
 
@@ -78,15 +77,15 @@ class UrlBuilder:
 
         return self._build_url(prefix)
 
-    def filter_and_sign(self, params: Dict):
+    def filter_and_sign(self, params: dict):
         return self._sign(self._filter_params(params or {}))
 
-    def _sign(self, params: Dict) -> Dict:
+    def _sign(self, params: dict) -> dict:
         if not params:
             params = {}
         params['apikey'] = self._API_KEY
         return params
 
     @staticmethod
-    def _filter_params(params: Dict) -> Dict:
+    def _filter_params(params: dict) -> dict:
         return {k: v for k, v in params.items() if v is not None}

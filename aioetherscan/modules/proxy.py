@@ -1,5 +1,3 @@
-from typing import Union, Dict
-
 from aioetherscan.common import check_hex, check_tag
 from aioetherscan.modules.base import BaseModule
 
@@ -18,7 +16,7 @@ class Proxy(BaseModule):
         """Returns the number of most recent block."""
         return await self._get(action='eth_blockNumber')
 
-    async def block_by_number(self, full: bool, tag: Union[int, str] = 'latest') -> Dict:
+    async def block_by_number(self, full: bool, tag: int | str = 'latest') -> dict:
         """Returns information about a block by block number."""
         return await self._get(
             action='eth_getBlockByNumber',
@@ -27,8 +25,8 @@ class Proxy(BaseModule):
         )
 
     async def uncle_block_by_number_and_index(
-        self, index: Union[int, str], tag: Union[int, str] = 'latest'
-    ) -> Dict:
+        self, index: int | str, tag: int | str = 'latest'
+    ) -> dict:
         """Returns information about a uncle by block number."""
         return await self._get(
             action='eth_getUncleByBlockNumberAndIndex',
@@ -36,23 +34,21 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def block_tx_count_by_number(self, tag: Union[int, str] = 'latest') -> str:
+    async def block_tx_count_by_number(self, tag: int | str = 'latest') -> str:
         """Returns the number of transactions in a block from a block matching the given block number."""
         return await self._get(
             action='eth_getBlockTransactionCountByNumber',
             tag=check_tag(tag),
         )
 
-    async def tx_by_hash(self, txhash: Union[int, str]) -> Dict:
+    async def tx_by_hash(self, txhash: int | str) -> dict:
         """Returns the information about a transaction requested by transaction hash."""
         return await self._get(
             action='eth_getTransactionByHash',
             txhash=check_hex(txhash),
         )
 
-    async def tx_by_number_and_index(
-        self, index: Union[int, str], tag: Union[int, str] = 'latest'
-    ) -> Dict:
+    async def tx_by_number_and_index(self, index: int | str, tag: int | str = 'latest') -> dict:
         """Returns information about a transaction by block number and transaction index position."""
         return await self._get(
             action='eth_getTransactionByBlockNumberAndIndex',
@@ -60,7 +56,7 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def tx_count(self, address: str, tag: Union[int, str] = 'latest') -> str:
+    async def tx_count(self, address: str, tag: int | str = 'latest') -> str:
         """Returns the number of transactions sent from an address."""
         return await self._get(
             action='eth_getTransactionCount',
@@ -68,18 +64,18 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def send_raw_tx(self, raw_hex: str) -> Dict:
+    async def send_raw_tx(self, raw_hex: str) -> dict:
         """Creates new message call transaction or a contract creation for signed transactions."""
         return await self._post(module='proxy', action='eth_sendRawTransaction', hex=raw_hex)
 
-    async def tx_receipt(self, txhash: str) -> Dict:
+    async def tx_receipt(self, txhash: str) -> dict:
         """Returns the receipt of a transaction by transaction hash."""
         return await self._get(
             action='eth_getTransactionReceipt',
             txhash=check_hex(txhash),
         )
 
-    async def call(self, to: str, data: str, tag: Union[int, str] = 'latest') -> str:
+    async def call(self, to: str, data: str, tag: int | str = 'latest') -> str:
         """Executes a new message call immediately without creating a transaction on the block chain."""
         return await self._get(
             action='eth_call',
@@ -88,7 +84,7 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def code(self, address: str, tag: Union[int, str] = 'latest') -> str:
+    async def code(self, address: str, tag: int | str = 'latest') -> str:
         """Returns code at a given address."""
         return await self._get(
             action='eth_getCode',
@@ -96,7 +92,7 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def storage_at(self, address: str, position: str, tag: Union[int, str] = 'latest') -> str:
+    async def storage_at(self, address: str, position: str, tag: int | str = 'latest') -> str:
         """Returns the value from a storage position at a given address."""
         return await self._get(
             action='eth_getStorageAt',
