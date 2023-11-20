@@ -11,8 +11,12 @@ from aiohttp.hdrs import METH_GET, METH_POST
 from aiohttp_retry import ExponentialRetry
 from asyncio_throttle import Throttler
 
-from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
-    EtherscanClientProxyError
+from aioetherscan.exceptions import (
+    EtherscanClientContentTypeError,
+    EtherscanClientError,
+    EtherscanClientApiError,
+    EtherscanClientProxyError,
+)
 from aioetherscan.network import Network
 from aioetherscan.url_builder import UrlBuilder
 
@@ -86,11 +90,15 @@ async def test_post(nw):
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data'})
-        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
+        mock.assert_called_once_with(
+            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
+        )
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data', 'null': None})
-        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
+        mock.assert_called_once_with(
+            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
+        )
 
 
 @pytest.mark.asyncio
@@ -112,7 +120,9 @@ async def test_request(nw):
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_GET)
         throttler_mock.assert_awaited_once()
-        get_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        get_mock.assert_called_once_with(
+            'https://api.etherscan.io/api', params=None, data=None, proxy=None
+        )
         h.assert_called_once()
 
     post_mock = MagicMockContext()
@@ -120,7 +130,9 @@ async def test_request(nw):
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_POST)
         throttler_mock.assert_awaited()
-        post_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        post_mock.assert_called_once_with(
+            'https://api.etherscan.io/api', params=None, data=None, proxy=None
+        )
         h.assert_called_once()
 
     assert throttler_mock.call_count == 2
@@ -156,7 +168,9 @@ async def test_handle_response(nw):
         await nw._handle_response(MockResponse('some', Exception('some exception')))
 
     with pytest.raises(EtherscanClientApiError) as e:
-        await nw._handle_response(MockResponse('{"status": "0", "message": "NOTOK", "result": "res"}'))
+        await nw._handle_response(
+            MockResponse('{"status": "0", "message": "NOTOK", "result": "res"}')
+        )
     assert e.value.message == 'NOTOK'
     assert e.value.result == 'res'
 

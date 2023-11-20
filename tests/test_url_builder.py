@@ -48,7 +48,7 @@ def test_filter_params(ub):
         ('arbitrum', 'goerli', 'https://api-goerli.arbiscan.io/api'),
         ('fantom', 'main', 'https://api.ftmscan.com/api'),
         ('fantom', 'testnet', 'https://api-testnet.ftmscan.com/api'),
-    ]
+    ],
 )
 def test_api_url(api_kind, network_name, expected):
     ub = UrlBuilder(apikey(), api_kind, network_name)
@@ -77,7 +77,7 @@ def test_api_url(api_kind, network_name, expected):
         ('arbitrum', 'goerli', 'https://goerli.arbiscan.io'),
         ('fantom', 'main', 'https://ftmscan.com'),
         ('fantom', 'testnet', 'https://testnet.ftmscan.com'),
-    ]
+    ],
 )
 def test_base_url(api_kind, network_name, expected):
     ub = UrlBuilder(apikey(), api_kind, network_name)
@@ -100,8 +100,8 @@ def test_invalid_api_kind():
         ('optimism', 'ETH'),
         ('arbitrum', 'ETH'),
         ('fantom', 'FTM'),
-    ]
+    ],
 )
-def test_base_url(api_kind, expected):
+def test_currency(api_kind, expected):
     ub = UrlBuilder(apikey(), api_kind, 'main')
     assert ub.currency == expected

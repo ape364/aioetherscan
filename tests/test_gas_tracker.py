@@ -18,7 +18,9 @@ async def gas_tracker():
 async def test_estimation_of_confirmation_time(gas_tracker):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await gas_tracker.estimation_of_confirmation_time(123)
-        mock.assert_called_once_with(params=dict(module='gastracker', action='gasestimate', gasprice=123))
+        mock.assert_called_once_with(
+            params=dict(module='gastracker', action='gasestimate', gasprice=123)
+        )
 
 
 @pytest.mark.asyncio
@@ -41,8 +43,9 @@ async def test_daily_average_gas_limit(gas_tracker):
                 action='dailyavggaslimit',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await gas_tracker.daily_average_gas_limit(start_date, end_date)
@@ -52,8 +55,9 @@ async def test_daily_average_gas_limit(gas_tracker):
                 action='dailyavggaslimit',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await gas_tracker.daily_average_gas_limit(start_date, end_date, 'wrong')
@@ -72,8 +76,9 @@ async def test_daily_total_gas_used(gas_tracker):
                 action='dailygasused',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await gas_tracker.daily_total_gas_used(start_date, end_date)
@@ -83,8 +88,9 @@ async def test_daily_total_gas_used(gas_tracker):
                 action='dailygasused',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await gas_tracker.daily_total_gas_used(start_date, end_date, 'wrong')
@@ -103,8 +109,9 @@ async def test_daily_average_gas_price(gas_tracker):
                 action='dailyavggasprice',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await gas_tracker.daily_average_gas_price(start_date, end_date)
@@ -114,8 +121,9 @@ async def test_daily_average_gas_price(gas_tracker):
                 action='dailyavggasprice',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await gas_tracker.daily_average_gas_price(start_date, end_date, 'wrong')

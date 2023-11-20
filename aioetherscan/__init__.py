@@ -1,1 +1,1 @@
-from aioetherscan.client import Client
+from aioetherscan.client import Client  # noqa: F401

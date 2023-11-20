@@ -23,7 +23,7 @@ def check_tag(tag: Union[str, int]) -> str:
     _TAGS = (
         'earliest',  # the earliest/genesis block
         'latest',  # the latest mined block
-        'pending'  # for the pending state/transactions
+        'pending',  # for the pending state/transactions
     )
 
     if tag in _TAGS:
@@ -34,7 +34,7 @@ def check_tag(tag: Union[str, int]) -> str:
 def check_sort_direction(sort: str) -> str:
     _SORT_ORDERS = (
         'asc',  # ascending order
-        'desc'  # descending order
+        'desc',  # descending order
     )
     return check_value(sort, _SORT_ORDERS)
 
@@ -42,7 +42,7 @@ def check_sort_direction(sort: str) -> str:
 def check_blocktype(blocktype: str) -> str:
     _BLOCK_TYPES = (
         'blocks',  # full blocks only
-        'uncles'  # uncle blocks only
+        'uncles',  # uncle blocks only
     )
     return check_value(blocktype, _BLOCK_TYPES)
 
@@ -50,7 +50,7 @@ def check_blocktype(blocktype: str) -> str:
 def check_closest_value(closest_value: str) -> str:
     _CLOSEST_VALUES = (
         'before',  # ascending order
-        'after'  # descending order
+        'after',  # descending order
     )
 
     return check_value(closest_value, _CLOSEST_VALUES)
@@ -90,5 +90,5 @@ def get_daily_stats_params(action: str, start_date: date, end_date: date, sort: 
         action=action,
         startdate=start_date.isoformat(),
         enddate=end_date.isoformat(),
-        sort=check_sort_direction(sort)
+        sort=check_sort_direction(sort),
     )

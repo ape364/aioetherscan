@@ -10,15 +10,25 @@ from aiohttp.hdrs import METH_GET, METH_POST
 from aiohttp_retry import RetryOptionsBase, RetryClient
 from asyncio_throttle import Throttler
 
-from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
-    EtherscanClientProxyError
+from aioetherscan.exceptions import (
+    EtherscanClientContentTypeError,
+    EtherscanClientError,
+    EtherscanClientApiError,
+    EtherscanClientProxyError,
+)
 from aioetherscan.url_builder import UrlBuilder
 
 
 class Network:
-    def __init__(self, url_builder: UrlBuilder,
-                 loop: Optional[AbstractEventLoop], timeout: Optional[ClientTimeout], proxy: Optional[str],
-                 throttler: Optional[AsyncContextManager], retry_options: Optional[RetryOptionsBase]) -> None:
+    def __init__(
+        self,
+        url_builder: UrlBuilder,
+        loop: Optional[AbstractEventLoop],
+        timeout: Optional[ClientTimeout],
+        proxy: Optional[str],
+        throttler: Optional[AsyncContextManager],
+        retry_options: Optional[RetryOptionsBase],
+    ) -> None:
         self._url_builder = url_builder
 
         self._loop = loop or asyncio.get_event_loop()
@@ -50,19 +60,21 @@ class Network:
         else:
             session = ClientSession(loop=self._loop)
 
-        return RetryClient(
-            client_session=session,
-            retry_options=self._retry_options
-        )
+        return RetryClient(client_session=session, retry_options=self._retry_options)
 
-    async def _request(self, method: str, data: Dict = None, params: Dict = None) -> Union[Dict, List, str]:
+    async def _request(
+        self, method: str, data: Dict = None, params: Dict = None
+    ) -> Union[Dict, List, str]:
         if self._retry_client is None:
             self._retry_client = self._get_retry_client()
         session_method = getattr(self._retry_client, method.lower())
         async with self._throttler:
-            async with session_method(self._url_builder.API_URL, params=params, data=data,
-                                      proxy=self._proxy) as response:
-                self._logger.debug('[%s] %r %r %s', method, str(response.url), data, response.status)
+            async with session_method(
+                self._url_builder.API_URL, params=params, data=data, proxy=self._proxy
+            ) as response:
+                self._logger.debug(
+                    '[%s] %r %r %s', method, str(response.url), data, response.status
+                )
                 return await self._handle_response(response)
 
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Union[Dict, list, str]:

@@ -17,14 +17,18 @@ async def contract():
 async def test_contract_abi(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.contract_abi('0x012345')
-        mock.assert_called_once_with(params=dict(module='contract', action='getabi', address='0x012345'))
+        mock.assert_called_once_with(
+            params=dict(module='contract', action='getabi', address='0x012345')
+        )
 
 
 @pytest.mark.asyncio
 async def test_contract_source_code(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.contract_source_code('0x012345')
-        mock.assert_called_once_with(params=dict(module='contract', action='getsourcecode', address='0x012345'))
+        mock.assert_called_once_with(
+            params=dict(module='contract', action='getsourcecode', address='0x012345')
+        )
 
 
 @pytest.mark.asyncio
@@ -32,7 +36,12 @@ async def test_contract_creation(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.contract_creation(['0x012345', '0x678901'])
         mock.assert_called_once_with(
-            params=dict(module='contract', action='getcontractcreation', contractaddresses='0x012345,0x678901'))
+            params=dict(
+                module='contract',
+                action='getcontractcreation',
+                contractaddresses='0x012345,0x678901',
+            )
+        )
 
 
 @pytest.mark.asyncio
@@ -45,7 +54,7 @@ async def test_verify_contract_source_code(contract):
             compiler_version='1.0.0',
             optimization_used=False,
             runs=123,
-            constructor_arguements='some args'
+            constructor_arguements='some args',
         )
         mock.assert_called_once_with(
             data=dict(
@@ -57,7 +66,7 @@ async def test_verify_contract_source_code(contract):
                 compilerversion='1.0.0',
                 optimizationUsed=0,
                 runs=123,
-                constructorArguements='some args'
+                constructorArguements='some args',
             )
         )
 
@@ -70,7 +79,7 @@ async def test_verify_contract_source_code(contract):
             optimization_used=False,
             runs=123,
             constructor_arguements='some args',
-            libraries={'one_name': 'one_addr', 'two_name': 'two_addr'}
+            libraries={'one_name': 'one_addr', 'two_name': 'two_addr'},
         )
         mock.assert_called_once_with(
             data=dict(
@@ -95,7 +104,9 @@ async def test_verify_contract_source_code(contract):
 async def test_check_verification_status(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.check_verification_status('some_guid')
-        mock.assert_called_once_with(params=dict(module='contract', action='checkverifystatus', guid='some_guid'))
+        mock.assert_called_once_with(
+            params=dict(module='contract', action='checkverifystatus', guid='some_guid')
+        )
 
 
 async def test_verify_proxy_contract(contract):
@@ -131,7 +142,9 @@ async def test_verify_proxy_contract(contract):
 async def test_check_proxy_contract_verification(contract):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await contract.check_proxy_contract_verification('some_guid')
-        mock.assert_called_once_with(params=dict(module='contract', action='checkproxyverification', guid='some_guid'))
+        mock.assert_called_once_with(
+            params=dict(module='contract', action='checkproxyverification', guid='some_guid')
+        )
 
 
 def test_parse_libraries(contract):
@@ -143,7 +156,7 @@ def test_parse_libraries(contract):
         'libraryname1': 'lib1',
         'libraryaddress1': 'addr1',
         'libraryname2': 'lib2',
-        'libraryaddress2': 'addr2'
+        'libraryaddress2': 'addr2',
     }
     assert contract._parse_libraries(mydict) == expected
 

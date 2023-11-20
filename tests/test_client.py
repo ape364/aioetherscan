@@ -27,7 +27,7 @@ async def client():
 def test_api_key():
     with pytest.raises(TypeError):
         # noinspection PyArgumentList,PyUnusedLocal
-        c = Client()
+        Client()
 
 
 def test_init(client):

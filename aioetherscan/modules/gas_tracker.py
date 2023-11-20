@@ -23,32 +23,38 @@ class GasTracker(BaseModule):
         """Get Gas Oracle"""
         return await self._get(action='gasoracle')
 
-    async def daily_average_gas_limit(self, start_date: date, end_date: date, sort: Optional[str] = None) -> List[Dict]:
+    async def daily_average_gas_limit(
+        self, start_date: date, end_date: date, sort: Optional[str] = None
+    ) -> List[Dict]:
         """Get Daily Average Gas Limit"""
         return await self._get(
             module='stats',
             action='dailyavggaslimit',
             startdate=start_date.isoformat(),
             enddate=end_date.isoformat(),
-            sort=check_sort_direction(sort)
+            sort=check_sort_direction(sort),
         )
 
-    async def daily_total_gas_used(self, start_date: date, end_date: date, sort: Optional[str] = None) -> Dict:
+    async def daily_total_gas_used(
+        self, start_date: date, end_date: date, sort: Optional[str] = None
+    ) -> Dict:
         """Get Ethereum Daily Total Gas Used"""
         return await self._get(
             module='stats',
             action='dailygasused',
             startdate=start_date.isoformat(),
             enddate=end_date.isoformat(),
-            sort=check_sort_direction(sort)
+            sort=check_sort_direction(sort),
         )
 
-    async def daily_average_gas_price(self, start_date: date, end_date: date, sort: Optional[str] = None) -> Dict:
+    async def daily_average_gas_price(
+        self, start_date: date, end_date: date, sort: Optional[str] = None
+    ) -> Dict:
         """Get Daily Average Gas Price"""
         return await self._get(
             module='stats',
             action='dailyavggasprice',
             startdate=start_date.isoformat(),
             enddate=end_date.isoformat(),
-            sort=check_sort_direction(sort)
+            sort=check_sort_direction(sort),
         )

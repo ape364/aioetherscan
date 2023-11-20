@@ -2,13 +2,20 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from aioetherscan.common import check_hex, check_tag, check_value, check_sort_direction, check_blocktype, \
-    check_client_type, check_sync_mode
+from aioetherscan.common import (
+    check_hex,
+    check_tag,
+    check_value,
+    check_sort_direction,
+    check_blocktype,
+    check_client_type,
+    check_sync_mode,
+)
 
 
 def test_check_hex():
     assert check_hex(123) == '0x7b'
-    assert check_hex(0x7b) == '0x7b'
+    assert check_hex(0x7B) == '0x7b'
     assert check_hex('0x7b') == '0x7b'
     with pytest.raises(ValueError):
         check_hex('wrong')

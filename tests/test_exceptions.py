@@ -1,4 +1,8 @@
-from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientApiError, EtherscanClientProxyError
+from aioetherscan.exceptions import (
+    EtherscanClientContentTypeError,
+    EtherscanClientApiError,
+    EtherscanClientProxyError,
+)
 
 
 def test_content_type_error():

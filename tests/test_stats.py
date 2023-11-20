@@ -50,11 +50,17 @@ async def test_eth_nodes_size(stats):
                 enddate='2023-11-13',
                 clienttype='geth',
                 syncmode='default',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await stats.eth_nodes_size(start_date, end_date, 'geth', 'default', )
+        await stats.eth_nodes_size(
+            start_date,
+            end_date,
+            'geth',
+            'default',
+        )
         mock.assert_called_once_with(
             params=dict(
                 module='stats',
@@ -63,8 +69,9 @@ async def test_eth_nodes_size(stats):
                 enddate='2023-11-13',
                 clienttype='geth',
                 syncmode='default',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.eth_nodes_size(start_date, end_date, 'wrong', 'default', 'asc')
@@ -96,8 +103,9 @@ async def test_daily_network_tx_fee(stats):
                 action='dailytxnfee',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_network_tx_fee(start_date, end_date)
@@ -107,8 +115,9 @@ async def test_daily_network_tx_fee(stats):
                 action='dailytxnfee',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_network_tx_fee(start_date, end_date, 'wrong')
@@ -127,8 +136,9 @@ async def test_daily_new_address_count(stats):
                 action='dailynewaddress',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_new_address_count(start_date, end_date)
@@ -138,8 +148,9 @@ async def test_daily_new_address_count(stats):
                 action='dailynewaddress',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_new_address_count(start_date, end_date, 'wrong')
@@ -158,8 +169,9 @@ async def test_daily_network_utilization(stats):
                 action='dailynetutilization',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_network_utilization(start_date, end_date)
@@ -169,8 +181,9 @@ async def test_daily_network_utilization(stats):
                 action='dailynetutilization',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_network_utilization(start_date, end_date, 'wrong')
@@ -189,8 +202,9 @@ async def test_daily_average_network_hash_rate(stats):
                 action='dailyavghashrate',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_average_network_hash_rate(start_date, end_date)
@@ -200,8 +214,9 @@ async def test_daily_average_network_hash_rate(stats):
                 action='dailyavghashrate',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_average_network_hash_rate(start_date, end_date, 'wrong')
@@ -220,8 +235,9 @@ async def test_daily_transaction_count(stats):
                 action='dailytx',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_transaction_count(start_date, end_date)
@@ -231,8 +247,9 @@ async def test_daily_transaction_count(stats):
                 action='dailytx',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_transaction_count(start_date, end_date, 'wrong')
@@ -251,8 +268,9 @@ async def test_daily_average_network_difficulty(stats):
                 action='dailyavgnetdifficulty',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.daily_average_network_difficulty(start_date, end_date)
@@ -262,8 +280,9 @@ async def test_daily_average_network_difficulty(stats):
                 action='dailyavgnetdifficulty',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.daily_average_network_difficulty(start_date, end_date, 'wrong')
@@ -282,8 +301,9 @@ async def test_ether_historical_daily_market_cap(stats):
                 action='ethdailymarketcap',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.ether_historical_daily_market_cap(start_date, end_date)
@@ -293,8 +313,9 @@ async def test_ether_historical_daily_market_cap(stats):
                 action='ethdailymarketcap',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.ether_historical_daily_market_cap(start_date, end_date, 'wrong')
@@ -313,8 +334,9 @@ async def test_ether_historical_price(stats):
                 action='ethdailyprice',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort='asc'
-            ))
+                sort='asc',
+            )
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await stats.ether_historical_price(start_date, end_date)
@@ -324,8 +346,9 @@ async def test_ether_historical_price(stats):
                 action='ethdailyprice',
                 startdate='2023-11-12',
                 enddate='2023-11-13',
-                sort=None
-            ))
+                sort=None,
+            )
+        )
 
     with pytest.raises(ValueError):
         await stats.ether_historical_price(start_date, end_date, 'wrong')

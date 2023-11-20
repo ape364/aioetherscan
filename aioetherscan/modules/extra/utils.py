@@ -14,36 +14,36 @@ class Utils:
         self._client = client
 
     async def token_transfers_generator(
-            self,
-            address: str = None,
-            contract_address: str = None,
-            block_limit: int = 50,
-            offset: int = 3,
-            start_block: int = 0,
-            end_block: int = None,
+        self,
+        address: str = None,
+        contract_address: str = None,
+        block_limit: int = 50,
+        offset: int = 3,
+        start_block: int = 0,
+        end_block: int = None,
     ) -> AsyncIterator[Dict]:
         if end_block is None:
             end_block = int(await self._client.proxy.block_number(), 16)
 
         for sblock, eblock in self._generate_intervals(start_block, end_block, block_limit):
             async for transfer in self._parse_by_pages(
-                    address=address,
-                    contract_address=contract_address,
-                    start_block=sblock,
-                    end_block=eblock,
-                    offset=offset,
+                address=address,
+                contract_address=contract_address,
+                start_block=sblock,
+                end_block=eblock,
+                offset=offset,
             ):
                 yield transfer
 
     async def token_transfers(
-            self,
-            address: str = None,
-            contract_address: str = None,
-            be_polite: bool = True,
-            block_limit: int = 50,
-            offset: int = 3,
-            start_block: int = 0,
-            end_block: int = None,
+        self,
+        address: str = None,
+        contract_address: str = None,
+        be_polite: bool = True,
+        block_limit: int = 50,
+        offset: int = 3,
+        start_block: int = 0,
+        end_block: int = None,
     ) -> List[Dict]:
         kwargs = {k: v for k, v in locals().items() if k != 'self' and not k.startswith('_')}
         return [t async for t in self.token_transfers_generator(**kwargs)]
@@ -52,7 +52,10 @@ class Utils:
         try:
             response = await self._client.contract.contract_abi(address=address)
         except EtherscanClientApiError as e:
-            if e.message.upper() == 'NOTOK' and e.result.lower() == 'contract source code not verified':
+            if (
+                e.message.upper() == 'NOTOK'
+                and e.result.lower() == 'contract source code not verified'
+            ):
                 return False
             raise
         else:
@@ -61,10 +64,7 @@ class Utils:
     async def get_contract_creator(self, contract_address: str) -> Optional[str]:
         try:
             response = await self._client.account.internal_txs(
-                address=contract_address,
-                start_block=1,
-                page=1,
-                offset=1
+                address=contract_address, start_block=1, page=1, offset=1
             )  # try to find first internal transaction
         except EtherscanClientApiError as e:
             if e.message.lower() != 'no transactions found':
@@ -75,10 +75,7 @@ class Utils:
         if not response:
             try:
                 response = await self._client.account.normal_txs(
-                    address=contract_address,
-                    start_block=1,
-                    page=1,
-                    offset=1
+                    address=contract_address, start_block=1, page=1, offset=1
                 )  # try to find first normal transaction
             except EtherscanClientApiError as e:
                 if e.message.lower() != 'no transactions found':
@@ -87,12 +84,12 @@ class Utils:
         return next((i['from'].lower() for i in response), None)
 
     async def _parse_by_pages(
-            self,
-            start_block: int,
-            end_block: int,
-            offset: int,
-            address: str = None,
-            contract_address: str = None,
+        self,
+        start_block: int,
+        end_block: int,
+        offset: int,
+        address: str = None,
+        contract_address: str = None,
     ) -> AsyncIterator[Dict]:
         page = 1
 
@@ -104,7 +101,7 @@ class Utils:
                     start_block=start_block,
                     end_block=end_block,
                     page=page,
-                    offset=offset
+                    offset=offset,
                 )
             except EtherscanClientApiError as e:
                 if e.message == 'No transactions found':
@@ -116,6 +113,8 @@ class Utils:
                 page += 1
 
     @staticmethod
-    def _generate_intervals(from_number: int, to_number: int, count: int) -> Iterator[Tuple[int, int]]:
+    def _generate_intervals(
+        from_number: int, to_number: int, count: int
+    ) -> Iterator[Tuple[int, int]]:
         for i in range(from_number, to_number + 1, count):
             yield i, min(i + count - 1, to_number)
