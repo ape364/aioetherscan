@@ -6,7 +6,6 @@ class UrlBuilder:
     _API_KINDS = {
         'eth': ('etherscan.io', 'ETH'),
         'bsc': ('bscscan.com', 'BNB'),
-        'avax': ('snowtrace.io', 'AVAX'),
         'polygon': ('polygonscan.com', 'MATIC'),
         'optimism': ('etherscan.io', 'ETH'),
         'arbitrum': ('arbiscan.io', 'ETH'),
