@@ -75,6 +75,12 @@ def test_init(ub):
     assert isinstance(n._logger, logging.Logger)
 
 
+def test_no_loop(ub):
+    with pytest.raises(RuntimeError) as e:
+        Network(ub, None, None, None, None, None)
+    assert str(e.value) == 'no running event loop'
+
+
 @pytest.mark.asyncio
 async def test_get(nw):
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:

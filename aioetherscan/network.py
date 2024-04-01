@@ -31,7 +31,7 @@ class Network:
     ) -> None:
         self._url_builder = url_builder
 
-        self._loop = loop or asyncio.get_event_loop()
+        self._loop = loop or asyncio.get_running_loop()
         self._timeout = timeout
 
         self._proxy = proxy
