@@ -137,3 +137,5 @@ pip-selfcheck.json
 .idea/
 test.py
 tst.py
+
+.DS_Store
