@@ -21,7 +21,7 @@ class Logs(BaseModule):
         from_block: Union[int, str],
         to_block: Union[int, str],
         address: str,
-        topics: Optional[List[str]] = None,  # Make topics optional
+        topics: Optional[List[str]] = None,
         topic_operators: Optional[List[str]] = None,
     ) -> List[Dict]:
         """[Beta] The Event Log API was designed to provide an alternative to the native eth_getLogs
@@ -33,7 +33,7 @@ class Logs(BaseModule):
             fromBlock=self._check_block(from_block),
             toBlock=self._check_block(to_block),
             address=address,
-            **(self._fill_topics(topics, topic_operators) if topics else {}),  # Check if topics is not None
+            **(self._fill_topics(topics, topic_operators) if topics else {}),  
         )
 
     def _check_block(self, block: Union[str, int]) -> Union[str, int]:
@@ -56,7 +56,7 @@ class Logs(BaseModule):
         elif topics:
             return {'topic0': topics[0]}
         else:
-            return {}  # Return an empty dictionary if topics is None
+            return {} 
 
     def _check_topics(self, topics: List[str], topic_operators: Optional[List[str]]) -> None:
         if not topic_operators:
