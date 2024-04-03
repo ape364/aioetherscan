@@ -21,7 +21,7 @@ class Logs(BaseModule):
         from_block: Union[int, str],
         to_block: Union[int, str],
         address: str,
-        topics: List[str],
+        topics: Optional[List[str]] = None,  # Make topics optional
         topic_operators: Optional[List[str]] = None,
     ) -> List[Dict]:
         """[Beta] The Event Log API was designed to provide an alternative to the native eth_getLogs
@@ -33,7 +33,7 @@ class Logs(BaseModule):
             fromBlock=self._check_block(from_block),
             toBlock=self._check_block(to_block),
             address=address,
-            **self._fill_topics(topics, topic_operators),
+            **(self._fill_topics(topics, topic_operators) if topics else {}),  # Check if topics is not None
         )
 
     def _check_block(self, block: Union[str, int]) -> Union[str, int]:
@@ -43,20 +43,22 @@ class Logs(BaseModule):
             return block
         raise ValueError(f'Invalid value {block!r}, only integers or {self._BLOCKS} are supported.')
 
-    def _fill_topics(self, topics: List[str], topic_operators: List[str]):
-        if len(topics) > 1:
+    def _fill_topics(self, topics: List[str], topic_operators: Optional[List[str]]):
+        if topics and len(topics) > 1:
             self._check_topics(topics, topic_operators)
 
             topic_params = {f'topic{idx}': value for idx, value in enumerate(topics)}
             topic_operator_params = {
-                f'topic{idx}_{idx + 1}_opr': value for idx, value in enumerate(topic_operators)
+                f'topic{idx}_{idx + 1}_opr': value for idx, value in enumerate(topic_operators or [])
             }
 
             return {**topic_params, **topic_operator_params}
-        else:
+        elif topics:
             return {'topic0': topics[0]}
+        else:
+            return {}  # Return an empty dictionary if topics is None
 
-    def _check_topics(self, topics: List[str], topic_operators: List[str]) -> None:
+    def _check_topics(self, topics: List[str], topic_operators: Optional[List[str]]) -> None:
         if not topic_operators:
             raise ValueError('Topic operators are required when more than 1 topic passed.')
 
@@ -66,5 +68,5 @@ class Logs(BaseModule):
                     f'Invalid topic operator {op!r}, must be one of: {self._TOPIC_OPERATORS}'
                 )
 
-        if len(topics) - len(topic_operators) != 1:
-            raise ValueError('Invalid length of topic_operators list, must be len(topics) - 1.')
+        if len(topics) - (len(topic_operators) if topic_operators else 0) != 1:
+            raise ValueError('Invalid length of topic_operators list, must be len(topics) - 1.') 
