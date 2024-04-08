@@ -34,6 +34,7 @@ Supports blockchain explorers:
 
 * [Etherscan](https://docs.etherscan.io/getting-started/endpoint-urls)
 * [BscScan](https://docs.bscscan.com/getting-started/endpoint-urls)
+* [SnowTrace](https://snowtrace.io/documentation/etherscan-compatibility/accounts)
 * [PolygonScan](https://docs.polygonscan.com/getting-started/endpoint-urls)
 * [Optimism](https://docs.optimism.etherscan.io/getting-started/endpoint-urls)
 * [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
