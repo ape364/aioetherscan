@@ -86,7 +86,7 @@ async def test_get_contract_creator_internal_raise_none(contract_utils):
                 offset=1
             )
 
-            assert result is creator
+            assert result == creator
 
 
 @pytest.mark.asyncio
@@ -104,13 +104,16 @@ async def test_get_contract_creator_internal_raise_normal(contract_utils):
 
 @pytest.mark.asyncio
 async def test_get_contract_creator_internal_none(contract_utils):
-    internal_txs_mock = AsyncMock(return_value=[])
-    with patch('aioetherscan.modules.account.Account.internal_txs', new=internal_txs_mock) as mock:
-        result = await contract_utils.get_contract_creator(contract_address='addr')
-        mock.assert_called_once_with(
-            address='addr',
-            start_block=1,
-            page=1,
-            offset=1
-        )
-        assert result is None
+    empty_result_mock_int = AsyncMock(return_value=[])
+    empty_result_mock_norm = AsyncMock(return_value=[])
+
+    with patch('aioetherscan.modules.account.Account.internal_txs', new=empty_result_mock_int) as mock:
+        with patch('aioetherscan.modules.account.Account.normal_txs', new=empty_result_mock_norm):
+            result = await contract_utils.get_contract_creator(contract_address='addr')
+            mock.assert_called_once_with(
+                address='addr',
+                start_block=1,
+                page=1,
+                offset=1
+            )
+            assert result is None
