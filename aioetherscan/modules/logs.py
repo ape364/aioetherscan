@@ -1,6 +1,9 @@
-from typing import Union, Optional, List, Dict
+from typing import Optional, Literal
 
 from aioetherscan.modules.base import BaseModule
+
+TopicNumber = Literal[0, 1, 2, 3]
+TopicOperator = Literal['and', 'or']
 
 
 class Logs(BaseModule):
@@ -9,64 +12,58 @@ class Logs(BaseModule):
     https://docs.etherscan.io/api-endpoints/logs
     """
 
-    _TOPIC_OPERATORS = ('and', 'or')
-    _BLOCKS = ('latest',)
-
     @property
     def _module(self) -> str:
         return 'logs'
 
     async def get_logs(
         self,
-        from_block: Union[int, str],
-        to_block: Union[int, str],
-        address: str,
-        topics: Optional[List[str]] = None,
-        topic_operators: Optional[List[str]] = None,
-    ) -> List[Dict]:
-        """[Beta] The Event Log API was designed to provide an alternative to the native eth_getLogs
+        address: Optional[str] = None,
+        topics: Optional[dict[TopicNumber, str]] = None,
+        topic_operators: Optional[list[tuple[TopicNumber, TopicNumber, TopicOperator]]] = None,
+        from_block: Optional[int] = None,
+        to_block: Optional[int] = None,
+        page: Optional[int] = None,
+        offset: Optional[int] = None,
+    ) -> list[dict]:
+        """Get Event Logs by address and/or topics"""
 
-        https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getlogs.
-        """
+        if address is None and topics is None:
+            raise ValueError('Either address or topics must be passed.')
+
         return await self._get(
             action='getLogs',
-            fromBlock=self._check_block(from_block),
-            toBlock=self._check_block(to_block),
+            fromBlock=from_block,
+            toBlock=to_block,
             address=address,
-            **(self._fill_topics(topics, topic_operators) if topics else {}),  
+            page=page,
+            offset=offset,
+            **self._fill_topics(topics, topic_operators),
         )
 
-    def _check_block(self, block: Union[str, int]) -> Union[str, int]:
-        if isinstance(block, int):
-            return block
-        if block in self._BLOCKS:
-            return block
-        raise ValueError(f'Invalid value {block!r}, only integers or {self._BLOCKS} are supported.')
+    def _fill_topics(
+        self, topics: Optional[dict[int, str]], topic_operators: Optional[list[str]]
+    ) -> dict[str, str]:
+        if not topics:
+            return {}
 
-    def _fill_topics(self, topics: List[str], topic_operators: Optional[List[str]]):
-        if topics and len(topics) > 1:
-            self._check_topics(topics, topic_operators)
+        if len(topics) == 1:
+            topic_number, topic = topics.popitem()
+            return {f'topic{topic_number}': topic}
 
-            topic_params = {f'topic{idx}': value for idx, value in enumerate(topics)}
-            topic_operator_params = {
-                f'topic{idx}_{idx + 1}_opr': value for idx, value in enumerate(topic_operators or [])
-            }
-
-            return {**topic_params, **topic_operator_params}
-        elif topics:
-            return {'topic0': topics[0]}
-        else:
-            return {} 
-
-    def _check_topics(self, topics: List[str], topic_operators: Optional[List[str]]) -> None:
         if not topic_operators:
             raise ValueError('Topic operators are required when more than 1 topic passed.')
 
-        for op in topic_operators:
-            if op not in self._TOPIC_OPERATORS:
-                raise ValueError(
-                    f'Invalid topic operator {op!r}, must be one of: {self._TOPIC_OPERATORS}'
-                )
+        return {
+            **{f'topic{topic_number}': topic for topic_number, topic in topics.items()},
+            **{
+                self._get_topic_operator(first, second): opr
+                for first, second, opr in topic_operators
+            },
+        }
 
-        if len(topics) - (len(topic_operators) if topic_operators else 0) != 1:
-            raise ValueError('Invalid length of topic_operators list, must be len(topics) - 1.') 
+    @staticmethod
+    def _get_topic_operator(topic_one: TopicNumber, topic_two: TopicNumber) -> str:
+        if topic_one == topic_two:
+            raise ValueError('Topic numbers must be different when using topic operators.')
+        return f'topic{topic_one}_{topic_two}_opr'
