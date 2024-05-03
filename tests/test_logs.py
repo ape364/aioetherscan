@@ -13,6 +13,10 @@ async def logs():
     await c.close()
 
 
+def test_module(logs):
+    assert logs._module == 'logs'
+
+
 @pytest.mark.asyncio
 async def test_get_logs_raises_value_error_when_no_address_or_topics_provided(logs):
     with pytest.raises(ValueError):
