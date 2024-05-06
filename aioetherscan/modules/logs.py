@@ -5,6 +5,9 @@ from aioetherscan.modules.base import BaseModule
 TopicNumber = Literal[0, 1, 2, 3]
 TopicOperator = Literal['and', 'or']
 
+Topics = dict[TopicNumber, str]
+TopicOperators = set[tuple[TopicNumber, TopicNumber, TopicOperator]]
+
 
 class Logs(BaseModule):
     """Logs
@@ -19,8 +22,8 @@ class Logs(BaseModule):
     async def get_logs(
         self,
         address: Optional[str] = None,
-        topics: Optional[dict[TopicNumber, str]] = None,
-        topic_operators: Optional[list[tuple[TopicNumber, TopicNumber, TopicOperator]]] = None,
+        topics: Optional[Topics] = None,
+        operators: Optional[TopicOperators] = None,
         from_block: Optional[int] = None,
         to_block: Optional[int] = None,
         page: Optional[int] = None,
@@ -38,11 +41,11 @@ class Logs(BaseModule):
             address=address,
             page=page,
             offset=offset,
-            **self._fill_topics(topics, topic_operators),
+            **self._fill_topics(topics, operators),
         )
 
     def _fill_topics(
-        self, topics: Optional[dict[int, str]], topic_operators: Optional[list[str]]
+        self, topics: Optional[Topics], operators: Optional[TopicOperators]
     ) -> dict[str, str]:
         if not topics:
             return {}
@@ -51,19 +54,22 @@ class Logs(BaseModule):
             topic_number, topic = topics.popitem()
             return {f'topic{topic_number}': topic}
 
-        if not topic_operators:
+        if not operators:
             raise ValueError('Topic operators are required when more than 1 topic passed.')
 
         return {
             **{f'topic{topic_number}': topic for topic_number, topic in topics.items()},
-            **{
-                self._get_topic_operator(first, second): opr
-                for first, second, opr in topic_operators
-            },
+            **self._fill_topic_operators(operators),
         }
 
     @staticmethod
-    def _get_topic_operator(topic_one: TopicNumber, topic_two: TopicNumber) -> str:
-        if topic_one == topic_two:
-            raise ValueError('Topic numbers must be different when using topic operators.')
-        return f'topic{topic_one}_{topic_two}_opr'
+    def _fill_topic_operators(operators: TopicOperators) -> dict[str, str]:
+        same_topic_twice = 1 in (len(set(i[:2])) for i in operators)
+        duplicate = len(set(frozenset(sorted(i[:2])) for i in operators)) != len(operators)
+
+        if same_topic_twice or duplicate:
+            raise ValueError(
+                'Topic operators must be used with 2 different topics without duplicates.'
+            )
+
+        return {f'topic{first}_{second}_opr': opr for first, second, opr in operators}

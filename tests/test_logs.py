@@ -41,7 +41,7 @@ async def test_get_logs_calls_get_with_correct_parameters(logs):
 async def test_get_logs_calls_fill_topics_with_correct_parameters(logs):
     logs._get = AsyncMock(return_value=[])
     logs._fill_topics = Mock(return_value={})
-    await logs.get_logs(topics={0: '0x123'}, topic_operators=[(0, 1, 'and')])
+    await logs.get_logs(topics={0: '0x123'}, operators=[(0, 1, 'and')])
     logs._fill_topics.assert_called_once_with(
         {0: '0x123'},
         [(0, 1, 'and')],
@@ -96,7 +96,7 @@ def test_fill_topics_multiple_elements_none(logs):
 
 def test_fill_topics_multiple_elements_operators(logs):
     topics = {0: '0x123', 1: '0x456', 3: '0x789'}
-    topic_operators = [(0, 1, 'and'), (1, 2, 'or'), (0, 3, 'or')]
+    topic_operators = {(0, 1, 'and'), (1, 2, 'or'), (0, 3, 'or')}
     assert logs._fill_topics(topics, topic_operators) == {
         'topic0': '0x123',
         'topic1': '0x456',
@@ -107,13 +107,28 @@ def test_fill_topics_multiple_elements_operators(logs):
     }
 
 
-def test_same_topic_numbers(logs):
+def test_fill_topic_operators_ok(logs):
+    topic_operators = {(0, 1, 'and'), (1, 2, 'or'), (0, 3, 'or'), (0, 2, 'and')}
+    assert logs._fill_topic_operators(topic_operators) == {
+        'topic0_1_opr': 'and',
+        'topic1_2_opr': 'or',
+        'topic0_3_opr': 'or',
+        'topic0_2_opr': 'and',
+    }
+
+
+@pytest.mark.parametrize(
+    'topic_operators',
+    [
+        {(0, 1, 'and'), (1, 0, 'or'), (0, 3, 'or')},  # duplicate
+        {(0, 1, 'and'), (1, 2, 'or'), (3, 3, 'or')},  # same topic twice
+        {(0, 1, 'and'), (1, 0, 'or'), (3, 3, 'or')},  # both
+    ],
+)
+def test_fill_topic_operators_exception(logs, topic_operators):
     with pytest.raises(ValueError) as exc_info:
-        logs._get_topic_operator(0, 0)
-    assert str(exc_info.value) == 'Topic numbers must be different when using topic operators.'
-
-
-def test_different_topic_numbers(logs):
-    assert logs._get_topic_operator(0, 1) == 'topic0_1_opr'
-    assert logs._get_topic_operator(1, 0) == 'topic1_0_opr'
-    assert logs._get_topic_operator(2, 3) == 'topic2_3_opr'
+        logs._fill_topic_operators(topic_operators)
+    assert (
+        str(exc_info.value)
+        == 'Topic operators must be used with 2 different topics without duplicates.'
+    )
