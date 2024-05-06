@@ -9,6 +9,7 @@ class UrlBuilder:
         'avax': ('snowtrace.io', 'AVAX'),
         'polygon': ('polygonscan.com', 'MATIC'),
         'optimism': ('etherscan.io', 'ETH'),
+        'base': ('basescan.org', 'ETH'),
         'arbitrum': ('arbiscan.io', 'ETH'),
         'fantom': ('ftmscan.com', 'FTM'),
     }
