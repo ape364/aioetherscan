@@ -39,7 +39,7 @@ Supports blockchain explorers:
 * [Optimism](https://docs.optimism.etherscan.io/getting-started/endpoint-urls)
 * [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
 * [FtmScan](https://docs.ftmscan.com/getting-started/endpoint-urls)
-
+* [Basescan](https://docs.basescan.org/getting-started/endpoint-urls)
 ## Installation
 
 ```sh
