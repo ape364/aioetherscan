@@ -5,10 +5,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Proxy(BaseModule):
-    """Geth/Parity Proxy APIs
+    """Geth/Parity Proxy
 
-    https://etherscan.io/apis#proxy
-    https://github.com/ethereum/wiki/wiki/JSON-RPC
+    https://docs.etherscan.io/api-endpoints/geth-parity-proxy
     """
 
     @property
@@ -27,7 +26,9 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def uncle_block_by_number_and_index(self, index: Union[int, str], tag: Union[int, str] = 'latest') -> Dict:
+    async def uncle_block_by_number_and_index(
+        self, index: Union[int, str], tag: Union[int, str] = 'latest'
+    ) -> Dict:
         """Returns information about a uncle by block number."""
         return await self._get(
             action='eth_getUncleByBlockNumberAndIndex',
@@ -49,7 +50,9 @@ class Proxy(BaseModule):
             txhash=check_hex(txhash),
         )
 
-    async def tx_by_number_and_index(self, index: Union[int, str], tag: Union[int, str] = 'latest') -> Dict:
+    async def tx_by_number_and_index(
+        self, index: Union[int, str], tag: Union[int, str] = 'latest'
+    ) -> Dict:
         """Returns information about a transaction by block number and transaction index position."""
         return await self._get(
             action='eth_getTransactionByBlockNumberAndIndex',
@@ -67,11 +70,7 @@ class Proxy(BaseModule):
 
     async def send_raw_tx(self, raw_hex: str) -> Dict:
         """Creates new message call transaction or a contract creation for signed transactions."""
-        return await self._post(
-            module='proxy',
-            action='eth_sendRawTransaction',
-            hex=raw_hex
-        )
+        return await self._post(module='proxy', action='eth_sendRawTransaction', hex=raw_hex)
 
     async def tx_receipt(self, txhash: str) -> Dict:
         """Returns the receipt of a transaction by transaction hash."""
@@ -108,7 +107,9 @@ class Proxy(BaseModule):
 
     async def gas_price(self) -> str:
         """Returns the current price per gas in wei."""
-        return await self._get(action='eth_gasPrice', )
+        return await self._get(
+            action='eth_gasPrice',
+        )
 
     async def estimate_gas(self, to: str, value: str, gas_price: str, gas: str) -> str:
         """Makes a call or transaction, which won't be added to the blockchain and returns the used gas.

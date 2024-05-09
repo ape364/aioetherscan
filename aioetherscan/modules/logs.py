@@ -4,9 +4,9 @@ from aioetherscan.modules.base import BaseModule
 
 
 class Logs(BaseModule):
-    """Event logs
+    """Logs
 
-    https://etherscan.io/apis#logs
+    https://docs.etherscan.io/api-endpoints/logs
     """
 
     _TOPIC_OPERATORS = ('and', 'or')
@@ -17,12 +17,12 @@ class Logs(BaseModule):
         return 'logs'
 
     async def get_logs(
-            self,
-            from_block: Union[int, str],
-            to_block: Union[int, str],
-            address: str,
-            topics: List[str],
-            topic_operators: Optional[List[str]] = None
+        self,
+        from_block: Union[int, str],
+        to_block: Union[int, str],
+        address: str,
+        topics: List[str],
+        topic_operators: Optional[List[str]] = None,
     ) -> List[Dict]:
         """[Beta] The Event Log API was designed to provide an alternative to the native eth_getLogs
 
@@ -33,7 +33,7 @@ class Logs(BaseModule):
             fromBlock=self._check_block(from_block),
             toBlock=self._check_block(to_block),
             address=address,
-            **self._fill_topics(topics, topic_operators)
+            **self._fill_topics(topics, topic_operators),
         )
 
     def _check_block(self, block: Union[str, int]) -> Union[str, int]:
@@ -47,13 +47,9 @@ class Logs(BaseModule):
         if len(topics) > 1:
             self._check_topics(topics, topic_operators)
 
-            topic_params = {
-                f'topic{idx}': value
-                for idx, value in enumerate(topics)
-            }
+            topic_params = {f'topic{idx}': value for idx, value in enumerate(topics)}
             topic_operator_params = {
-                f'topic{idx}_{idx + 1}_opr': value
-                for idx, value in enumerate(topic_operators)
+                f'topic{idx}_{idx + 1}_opr': value for idx, value in enumerate(topic_operators)
             }
 
             return {**topic_params, **topic_operator_params}
@@ -66,7 +62,9 @@ class Logs(BaseModule):
 
         for op in topic_operators:
             if op not in self._TOPIC_OPERATORS:
-                raise ValueError(f'Invalid topic operator {op!r}, must be one of: {self._TOPIC_OPERATORS}')
+                raise ValueError(
+                    f'Invalid topic operator {op!r}, must be one of: {self._TOPIC_OPERATORS}'
+                )
 
         if len(topics) - len(topic_operators) != 1:
-            raise ValueError(f'Invalid length of topic_operators list, must be len(topics) - 1.')
+            raise ValueError('Invalid length of topic_operators list, must be len(topics) - 1.')

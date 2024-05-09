@@ -20,7 +20,9 @@ async def test_balance(logs):
             from_block=1,
             to_block=2,
             address='addr',
-            topics=['topic', ]
+            topics=[
+                'topic',
+            ],
         )
         mock.assert_called_once_with(
             params=dict(
@@ -29,7 +31,7 @@ async def test_balance(logs):
                 fromBlock=1,
                 toBlock=2,
                 address='addr',
-                topic0='topic'
+                topic0='topic',
             )
         )
 
@@ -38,7 +40,9 @@ async def test_balance(logs):
             from_block='latest',
             to_block='latest',
             address='addr',
-            topics=['topic', ]
+            topics=[
+                'topic',
+            ],
         )
         mock.assert_called_once_with(
             params=dict(
@@ -47,7 +51,7 @@ async def test_balance(logs):
                 fromBlock='latest',
                 toBlock='latest',
                 address='addr',
-                topic0='topic'
+                topic0='topic',
             )
         )
 
@@ -58,7 +62,7 @@ async def test_balance(logs):
                 to_block=2,
                 address='addr',
                 topics=['top1', 'top2'],
-                topic_operators=['and']
+                topic_operators=['and'],
             )
             block_mock.assert_has_calls([call(1), call(2)])
             mock.assert_called_once()
@@ -70,9 +74,16 @@ async def test_balance(logs):
                 from_block=1,
                 to_block=2,
                 address='addr',
-                topics=['topic', ]
+                topics=[
+                    'topic',
+                ],
             )
-            topic_mock.assert_called_once_with(['topic', ], None)
+            topic_mock.assert_called_once_with(
+                [
+                    'topic',
+                ],
+                None,
+            )
             mock.assert_called_once()
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -83,7 +94,7 @@ async def test_balance(logs):
                 to_block=2,
                 address='addr',
                 topics=['top1', 'top2'],
-                topic_operators=['and']
+                topic_operators=['and'],
             )
             topic_mock.assert_called_once_with(['top1', 'top2'], ['and'])
             mock.assert_called_once()
@@ -102,13 +113,20 @@ def test_fill_topics(logs):
 
     topics = ['top1', 'top2']
     topic_operators = ['or']
-    assert logs._fill_topics(topics, topic_operators) == {'topic0': 'top1', 'topic1': 'top2', 'topic0_1_opr': 'or'}
+    assert logs._fill_topics(topics, topic_operators) == {
+        'topic0': 'top1',
+        'topic1': 'top2',
+        'topic0_1_opr': 'or',
+    }
 
     topics = ['top1', 'top2', 'top3']
     topic_operators = ['or', 'and']
     assert logs._fill_topics(topics, topic_operators) == {
-        'topic0': 'top1', 'topic1': 'top2', 'topic2': 'top3',
-        'topic0_1_opr': 'or', 'topic1_2_opr': 'and'
+        'topic0': 'top1',
+        'topic1': 'top2',
+        'topic2': 'top3',
+        'topic0_1_opr': 'or',
+        'topic1_2_opr': 'and',
     }
 
     with patch('aioetherscan.modules.logs.Logs._check_topics', new=Mock()) as check_topics_mock:

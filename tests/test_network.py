@@ -11,8 +11,12 @@ from aiohttp.hdrs import METH_GET, METH_POST
 from aiohttp_retry import ExponentialRetry
 from asyncio_throttle import Throttler
 
-from aioetherscan.exceptions import EtherscanClientContentTypeError, EtherscanClientError, EtherscanClientApiError, \
-    EtherscanClientProxyError
+from aioetherscan.exceptions import (
+    EtherscanClientContentTypeError,
+    EtherscanClientError,
+    EtherscanClientApiError,
+    EtherscanClientProxyError,
+)
 from aioetherscan.network import Network
 from aioetherscan.url_builder import UrlBuilder
 
@@ -71,6 +75,12 @@ def test_init(ub):
     assert isinstance(n._logger, logging.Logger)
 
 
+def test_no_loop(ub):
+    with pytest.raises(RuntimeError) as e:
+        Network(ub, None, None, None, None, None)
+    assert str(e.value) == 'no running event loop'
+
+
 @pytest.mark.asyncio
 async def test_get(nw):
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
@@ -86,49 +96,15 @@ async def test_post(nw):
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data'})
-        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
+        mock.assert_called_once_with(
+            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
+        )
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data', 'null': None})
-        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'})
-
-
-def test_get_session_timeout_empty(nw):
-    nw._timeout = None
-    loop_mock = Mock()
-    nw._loop = loop_mock
-    with patch('aioetherscan.network.ClientSession') as session_mock:
-        rc = nw._get_session()
-        session_mock.assert_called_once_with(loop=loop_mock)
-        assert rc is session_mock.return_value
-
-
-def test_get_session_timeout_non_empty(nw):
-    timeout = 5
-    nw._timeout = timeout
-    loop_mock = Mock()
-    nw._loop = loop_mock
-    with patch('aioetherscan.network.ClientSession') as session_mock:
-        session = nw._get_session()
-        session_mock.assert_called_once_with(loop=loop_mock, timeout=timeout)
-        assert session is session_mock.return_value
-
-
-def test_get_retry_client(nw):
-    session_mock = Mock()
-    nw._get_session = session_mock
-
-    retry_options_mock = Mock()
-    nw._retry_options = retry_options_mock
-
-    with patch('aioetherscan.network.RetryClient') as rc_mock:
-        rc = nw._get_retry_client()
-
-        rc_mock.assert_called_once_with(
-            client_session=session_mock.return_value,
-            retry_options=retry_options_mock
+        mock.assert_called_once_with(
+            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
         )
-        assert rc is rc_mock.return_value
 
 
 @pytest.mark.asyncio
@@ -150,7 +126,6 @@ async def test_request(nw):
 
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_GET)
-        nw._get_retry_client.assert_called_once()
         throttler_mock.assert_awaited_once()
         retry_client_mock.get.assert_called_once_with(
             'https://api.etherscan.io/api', params=None, data=None, proxy=None
@@ -163,7 +138,9 @@ async def test_request(nw):
         await nw._request(METH_POST)
         nw._get_retry_client.assert_called_once()
         throttler_mock.assert_awaited()
-        post_mock.assert_called_once_with('https://api.etherscan.io/api', params=None, data=None, proxy=None)
+        post_mock.assert_called_once_with(
+            'https://api.etherscan.io/api', params=None, data=None, proxy=None
+        )
         h.assert_called_once()
 
     assert throttler_mock.call_count == 2
@@ -199,7 +176,9 @@ async def test_handle_response(nw):
         await nw._handle_response(MockResponse('some', Exception('some exception')))
 
     with pytest.raises(EtherscanClientApiError) as e:
-        await nw._handle_response(MockResponse('{"status": "0", "message": "NOTOK", "result": "res"}'))
+        await nw._handle_response(
+            MockResponse('{"status": "0", "message": "NOTOK", "result": "res"}')
+        )
     assert e.value.message == 'NOTOK'
     assert e.value.result == 'res'
 

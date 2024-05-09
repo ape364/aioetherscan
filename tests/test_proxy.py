@@ -30,12 +30,7 @@ async def test_block_by_number(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await proxy.block_by_number(True)
         mock.assert_called_once_with(
-            params=dict(
-                module='proxy',
-                action='eth_getBlockByNumber',
-                boolean=True,
-                tag='latest'
-            )
+            params=dict(module='proxy', action='eth_getBlockByNumber', boolean=True, tag='latest')
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -54,7 +49,7 @@ async def test_uncle_block_by_number_and_index(proxy):
                 module='proxy',
                 action='eth_getUncleByBlockNumberAndIndex',
                 index='0x7b',
-                tag='latest'
+                tag='latest',
             )
         )
 
@@ -72,11 +67,7 @@ async def test_block_tx_count_by_number(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await proxy.block_tx_count_by_number()
         mock.assert_called_once_with(
-            params=dict(
-                module='proxy',
-                action='eth_getBlockTransactionCountByNumber',
-                tag='latest'
-            )
+            params=dict(module='proxy', action='eth_getBlockTransactionCountByNumber', tag='latest')
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -91,11 +82,7 @@ async def test_tx_by_hash(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await proxy.tx_by_hash('0x123')
         mock.assert_called_once_with(
-            params=dict(
-                module='proxy',
-                action='eth_getTransactionByHash',
-                txhash='0x123'
-            )
+            params=dict(module='proxy', action='eth_getTransactionByHash', txhash='0x123')
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -114,7 +101,7 @@ async def test_tx_by_number_and_index(proxy):
                 module='proxy',
                 action='eth_getTransactionByBlockNumberAndIndex',
                 index='0x7b',
-                tag='latest'
+                tag='latest',
             )
         )
 
@@ -133,10 +120,7 @@ async def test_tx_count(proxy):
         await proxy.tx_count('addr')
         mock.assert_called_once_with(
             params=dict(
-                module='proxy',
-                action='eth_getTransactionCount',
-                address='addr',
-                tag='latest'
+                module='proxy', action='eth_getTransactionCount', address='addr', tag='latest'
             )
         )
 
@@ -184,13 +168,7 @@ async def test_call(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await proxy.call('0x123', '0x456')
         mock.assert_called_once_with(
-            params=dict(
-                module='proxy',
-                action='eth_call',
-                to='0x123',
-                data='0x456',
-                tag='latest'
-            )
+            params=dict(module='proxy', action='eth_call', to='0x123', data='0x456', tag='latest')
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -207,12 +185,7 @@ async def test_code(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await proxy.code('addr')
         mock.assert_called_once_with(
-            params=dict(
-                module='proxy',
-                action='eth_getCode',
-                address='addr',
-                tag='latest'
-            )
+            params=dict(module='proxy', action='eth_getCode', address='addr', tag='latest')
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
@@ -232,7 +205,7 @@ async def test_storage_at(proxy):
                 action='eth_getStorageAt',
                 address='addr',
                 position='pos',
-                tag='latest'
+                tag='latest',
             )
         )
 
@@ -258,12 +231,7 @@ async def test_gas_price(proxy):
 @pytest.mark.asyncio
 async def test_estimate_gas(proxy):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await proxy.estimate_gas(
-            to='0x123',
-            value='val',
-            gas_price='123',
-            gas='456'
-        )
+        await proxy.estimate_gas(to='0x123', value='val', gas_price='123', gas='456')
         mock.assert_called_once_with(
             params=dict(
                 module='proxy',
@@ -277,11 +245,6 @@ async def test_estimate_gas(proxy):
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         with patch('aioetherscan.modules.proxy.check_hex', new=Mock()) as hex_mock:
-            await proxy.estimate_gas(
-                to='0x123',
-                value='val',
-                gas_price='123',
-                gas='456'
-            )
+            await proxy.estimate_gas(to='0x123', value='val', gas_price='123', gas='456')
             hex_mock.assert_called_once_with('0x123')
             mock.assert_called_once()

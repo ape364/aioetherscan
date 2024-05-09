@@ -9,6 +9,7 @@ class UrlBuilder:
         'avax': ('snowtrace.io', 'AVAX'),
         'polygon': ('polygonscan.com', 'MATIC'),
         'optimism': ('etherscan.io', 'ETH'),
+        'base': ('basescan.org', 'ETH'),
         'arbitrum': ('arbiscan.io', 'ETH'),
         'fantom': ('ftmscan.com', 'FTM'),
     }
@@ -28,7 +29,9 @@ class UrlBuilder:
     def _set_api_kind(self, api_kind: str) -> None:
         api_kind = api_kind.lower().strip()
         if api_kind not in self._API_KINDS:
-            raise ValueError(f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}')
+            raise ValueError(
+                f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}'
+            )
         else:
             self.api_kind = api_kind
 
@@ -64,9 +67,7 @@ class UrlBuilder:
         return self._build_url(prefix, 'api')
 
     def _get_base_url(self) -> str:
-        network_exceptions = {
-            ('polygon', 'testnet'): 'mumbai'
-        }
+        network_exceptions = {('polygon', 'testnet'): 'mumbai'}
         network = network_exceptions.get((self.api_kind, self._network), self._network)
 
         prefix_exceptions = {
@@ -79,9 +80,7 @@ class UrlBuilder:
         return self._build_url(prefix)
 
     def filter_and_sign(self, params: Dict):
-        return self._sign(
-            self._filter_params(params or {})
-        )
+        return self._sign(self._filter_params(params or {}))
 
     def _sign(self, params: Dict) -> Dict:
         if not params:

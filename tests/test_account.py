@@ -17,11 +17,15 @@ async def account():
 async def test_balance(account):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balance('addr')
-        mock.assert_called_once_with(params=dict(module='account', action='balance', address='addr', tag='latest'))
+        mock.assert_called_once_with(
+            params=dict(module='account', action='balance', address='addr', tag='latest')
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balance('addr', 123)
-        mock.assert_called_once_with(params=dict(module='account', action='balance', address='addr', tag='0x7b'))
+        mock.assert_called_once_with(
+            params=dict(module='account', action='balance', address='addr', tag='0x7b')
+        )
 
 
 @pytest.mark.asyncio
@@ -29,11 +33,14 @@ async def test_balances(account):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balances(['a1', 'a2'])
         mock.assert_called_once_with(
-            params=dict(module='account', action='balancemulti', address='a1,a2', tag='latest'))
+            params=dict(module='account', action='balancemulti', address='a1,a2', tag='latest')
+        )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.balances(['a1', 'a2'], 123)
-        mock.assert_called_once_with(params=dict(module='account', action='balancemulti', address='a1,a2', tag='0x7b'))
+        mock.assert_called_once_with(
+            params=dict(module='account', action='balancemulti', address='a1,a2', tag='0x7b')
+        )
 
 
 @pytest.mark.asyncio
@@ -49,18 +56,13 @@ async def test_normal_txs(account):
                 endblock=None,
                 sort=None,
                 page=None,
-                offset=None
+                offset=None,
             )
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.normal_txs(
-            address='addr',
-            start_block=1,
-            end_block=2,
-            sort='asc',
-            page=3,
-            offset=4
+            address='addr', start_block=1, end_block=2, sort='asc', page=3, offset=4
         )
         mock.assert_called_once_with(
             params=dict(
@@ -71,7 +73,7 @@ async def test_normal_txs(account):
                 endblock=2,
                 sort='asc',
                 page=3,
-                offset=4
+                offset=4,
             )
         )
     with pytest.raises(ValueError):
@@ -95,19 +97,13 @@ async def test_internal_txs(account):
                 sort=None,
                 page=None,
                 offset=None,
-                txhash=None
+                txhash=None,
             )
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.internal_txs(
-            address='addr',
-            start_block=1,
-            end_block=2,
-            sort='asc',
-            page=3,
-            offset=4,
-            txhash='0x123'
+            address='addr', start_block=1, end_block=2, sort='asc', page=3, offset=4, txhash='0x123'
         )
         mock.assert_called_once_with(
             params=dict(
@@ -119,7 +115,7 @@ async def test_internal_txs(account):
                 sort='asc',
                 page=3,
                 offset=4,
-                txhash='0x123'
+                txhash='0x123',
             )
         )
     with pytest.raises(ValueError):
@@ -128,8 +124,17 @@ async def test_internal_txs(account):
             sort='wrong',
         )
 
+
 @pytest.mark.asyncio
-async def test_token_transfers(account):
+@pytest.mark.parametrize(
+    'token_standard,expected_action',
+    [
+        ('erc20', 'tokentx'),
+        ('erc721', 'tokennfttx'),
+        ('erc1155', 'token1155tx'),
+    ],
+)
+async def test_token_transfers(account, token_standard, expected_action):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
         await account.token_transfers('addr')
         mock.assert_called_once_with(
@@ -142,7 +147,7 @@ async def test_token_transfers(account):
                 sort=None,
                 page=None,
                 offset=None,
-                contractaddress=None
+                contractaddress=None,
             )
         )
 
@@ -154,7 +159,7 @@ async def test_token_transfers(account):
             sort='asc',
             page=3,
             offset=4,
-            contract_address='0x123'
+            contract_address='0x123',
         )
         mock.assert_called_once_with(
             params=dict(
@@ -166,9 +171,35 @@ async def test_token_transfers(account):
                 sort='asc',
                 page=3,
                 offset=4,
-                contractaddress='0x123'
+                contractaddress='0x123',
             )
         )
+
+    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
+        await account.token_transfers(
+            address='addr',
+            start_block=1,
+            end_block=2,
+            sort='asc',
+            page=3,
+            offset=4,
+            contract_address='0x123',
+            token_standard=token_standard,
+        )
+        mock.assert_called_once_with(
+            params=dict(
+                module='account',
+                action=expected_action,
+                address='addr',
+                startblock=1,
+                endblock=2,
+                sort='asc',
+                page=3,
+                offset=4,
+                contractaddress='0x123',
+            )
+        )
+
     with pytest.raises(ValueError):
         await account.token_transfers(
             address='addr',
@@ -176,6 +207,7 @@ async def test_token_transfers(account):
         )
     with pytest.raises(ValueError):
         await account.token_transfers(start_block=123)
+
 
 @pytest.mark.asyncio
 async def test_mined_blocks(account):
@@ -193,12 +225,7 @@ async def test_mined_blocks(account):
         )
 
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.mined_blocks(
-            address='addr',
-            blocktype='uncles',
-            page=1,
-            offset=2
-        )
+        await account.mined_blocks(address='addr', blocktype='uncles', page=1, offset=2)
         mock.assert_called_once_with(
             params=dict(
                 module='account',
@@ -206,7 +233,7 @@ async def test_mined_blocks(account):
                 address='addr',
                 blocktype='uncles',
                 page=1,
-                offset=2
+                offset=2,
             )
         )
 
@@ -218,50 +245,33 @@ async def test_mined_blocks(account):
 
 
 @pytest.mark.asyncio
-async def test_token_balance(account):
+async def test_beacon_chain_withdrawals(account):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_balance('addr', 'contractaddr')
+        await account.beacon_chain_withdrawals('addr')
         mock.assert_called_once_with(
             params=dict(
                 module='account',
-                action='tokenbalance',
+                action='txsBeaconWithdrawal',
                 address='addr',
-                contractaddress='contractaddr',
-                tag='latest',
+                startblock=None,
+                endblock=None,
+                sort=None,
+                page=None,
+                offset=None,
             )
         )
 
+    with pytest.raises(ValueError):
+        await account.beacon_chain_withdrawals(
+            address='addr',
+            sort='wrong',
+        )
+
+
+@pytest.mark.asyncio
+async def test_account_balance_by_blockno(account):
     with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await account.token_balance('addr', 'contractaddr', 123)
+        await account.account_balance_by_blockno('a1', 123)
         mock.assert_called_once_with(
-            params=dict(
-                module='account',
-                action='tokenbalance',
-                address='addr',
-                contractaddress='contractaddr',
-                tag='0x7b',
-            )
+            params=dict(module='account', action='balancehistory', address='a1', blockno=123)
         )
-
-
-def test_check(account):
-    assert account._check('a', ('a', 'b')) == 'a'
-    assert account._check('A', ('a', 'b')) == 'A'
-    with pytest.raises(ValueError):
-        account._check('c', ('a', 'b'))
-    with pytest.raises(ValueError):
-        account._check('C', ('a', 'b'))
-
-
-def test_check_sort_direction(account):
-    assert account._check_sort_direction('asc') == 'asc'
-    assert account._check_sort_direction('desc') == 'desc'
-    with pytest.raises(ValueError):
-        account._check_sort_direction('wrong')
-
-
-def test_check_blocktype(account):
-    assert account._check_blocktype('blocks') == 'blocks'
-    assert account._check_blocktype('uncles') == 'uncles'
-    with pytest.raises(ValueError):
-        account._check_blocktype('wrong')

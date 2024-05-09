@@ -45,12 +45,15 @@ def test_filter_params(ub):
         ('polygon', 'testnet', 'https://api-testnet.polygonscan.com/api'),
         ('optimism', 'main', 'https://api-optimistic.etherscan.io/api'),
         ('optimism', 'goerli', 'https://api-goerli-optimistic.etherscan.io/api'),
+        ('base', 'main', 'https://api.basescan.org/api'),
+        ('base', 'sepolia', 'https://api-sepolia.basescan.org/api'),
+        ('base', 'goerli', 'https://api-goerli.basescan.org/api'),
         ('arbitrum', 'main', 'https://api.arbiscan.io/api'),
         ('arbitrum', 'nova', 'https://api-nova.arbiscan.io/api'),
         ('arbitrum', 'goerli', 'https://api-goerli.arbiscan.io/api'),
         ('fantom', 'main', 'https://api.ftmscan.com/api'),
         ('fantom', 'testnet', 'https://api-testnet.ftmscan.com/api'),
-    ]
+    ],
 )
 def test_api_url(api_kind, network_name, expected):
     ub = UrlBuilder(apikey(), api_kind, network_name)
@@ -74,12 +77,15 @@ def test_api_url(api_kind, network_name, expected):
         ('polygon', 'testnet', 'https://mumbai.polygonscan.com'),
         ('optimism', 'main', 'https://optimistic.etherscan.io'),
         ('optimism', 'goerli', 'https://goerli-optimism.etherscan.io'),
+        ('base', 'main', 'https://basescan.org'),
+        ('base', 'sepolia', 'https://sepolia.basescan.org'),
+        ('base', 'goerli', 'https://goerli.basescan.org'),
         ('arbitrum', 'main', 'https://arbiscan.io'),
         ('arbitrum', 'nova', 'https://nova.arbiscan.io'),
         ('arbitrum', 'goerli', 'https://goerli.arbiscan.io'),
         ('fantom', 'main', 'https://ftmscan.com'),
         ('fantom', 'testnet', 'https://testnet.ftmscan.com'),
-    ]
+    ],
 )
 def test_base_url(api_kind, network_name, expected):
     ub = UrlBuilder(apikey(), api_kind, network_name)
@@ -100,11 +106,12 @@ def test_invalid_api_kind():
         ('avax', 'AVAX'),
         ('polygon', 'MATIC'),
         ('optimism', 'ETH'),
+        ('base', 'ETH'),
         ('arbitrum', 'ETH'),
         ('fantom', 'FTM'),
-    ]
+    ],
 )
-def test_base_url(api_kind, expected):
+def test_currency(api_kind, expected):
     ub = UrlBuilder(apikey(), api_kind, 'main')
     assert ub.currency == expected
 

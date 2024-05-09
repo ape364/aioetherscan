@@ -14,14 +14,15 @@
 
 Supports all API modules:
 
-* [Accounts](https://etherscan.io/apis#accounts)
-* [Contracts](https://etherscan.io/apis#contracts)
-* [Transactions](https://etherscan.io/apis#transactions)
-* [Blocks](https://etherscan.io/apis#blocks)
-* [Event logs](https://etherscan.io/apis#logs)
-* [GETH/Parity proxy](https://etherscan.io/apis#proxy)
-* [Tokens](https://etherscan.io/apis#tokens)
-* [Stats](https://etherscan.io/apis#stats)
+* [Accounts](https://docs.etherscan.io/api-endpoints/accounts)
+* [Contracts](https://docs.etherscan.io/api-endpoints/contracts)
+* [Transactions](https://docs.etherscan.io/api-endpoints/stats)
+* [Blocks](https://docs.etherscan.io/api-endpoints/blocks)
+* [Event logs](https://docs.etherscan.io/api-endpoints/logs)
+* [GETH/Parity proxy](https://docs.etherscan.io/api-endpoints/geth-parity-proxy)
+* [Tokens](https://docs.etherscan.io/api-endpoints/tokens)
+* [Gas Tracker](https://docs.etherscan.io/api-endpoints/gas-tracker)
+* [Stats](https://docs.etherscan.io/api-endpoints/stats-1)
 
 Also provides extra modules:
 * `utils` allows to fetch a lot of transactions without timeouts and not getting banned
@@ -33,12 +34,12 @@ Supports blockchain explorers:
 
 * [Etherscan](https://docs.etherscan.io/getting-started/endpoint-urls)
 * [BscScan](https://docs.bscscan.com/getting-started/endpoint-urls)
-* [SnowTrace](https://docs.snowtrace.io/getting-started/endpoint-urls)
+* [SnowTrace](https://snowtrace.io/documentation/etherscan-compatibility/accounts)
 * [PolygonScan](https://docs.polygonscan.com/getting-started/endpoint-urls)
 * [Optimism](https://docs.optimism.etherscan.io/getting-started/endpoint-urls)
 * [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
 * [FtmScan](https://docs.ftmscan.com/getting-started/endpoint-urls)
-
+* [Basescan](https://docs.basescan.org/getting-started/endpoint-urls)
 ## Installation
 
 ```sh

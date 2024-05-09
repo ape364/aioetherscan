@@ -1,35 +1,30 @@
 import logging
-from typing import AsyncIterator, TypeAlias, Any, Iterable
+from typing import AsyncIterator, Any, Iterable
 from typing import Callable
 
 from aioetherscan.exceptions import EtherscanClientApiError
 from aioetherscan.modules.extra.generators.blocks_range import BlocksRange
 from aioetherscan.modules.extra.generators.helpers import get_max_block_number, drop_block
 
-Transfer: TypeAlias = dict[str, Any]
+Transfer = dict[str, Any]
 
 
 class BlocksParser:
     _OFFSET: int = 10_000
 
     def __init__(
-            self,
-            api_method: Callable,
-            request_params: dict[str, Any],
-            start_block: int,
-            end_block: int,
-            blocks_limit: int,
-            blocks_limit_divider: int
+        self,
+        api_method: Callable,
+        request_params: dict[str, Any],
+        start_block: int,
+        end_block: int,
+        blocks_limit: int,
+        blocks_limit_divider: int,
     ) -> None:
         self._api_method = api_method
         self._request_params = request_params
 
-        self._blocks_range = BlocksRange(
-            start_block,
-            end_block,
-            blocks_limit,
-            blocks_limit_divider
-        )
+        self._blocks_range = BlocksRange(start_block, end_block, blocks_limit, blocks_limit_divider)
 
         self._logger = logging.getLogger(__name__)
         self._total_txs = 0
@@ -85,11 +80,7 @@ class BlocksParser:
                 self._logger.debug(
                     f'Probably not all txs have been fetched, dropping txs with the last block {transfers_max_block:,}'
                 )
-                return transfers_max_block - 1, drop_block(
-                    transfers, transfers_max_block
-                )
+                return transfers_max_block - 1, drop_block(transfers, transfers_max_block)
             else:
-                self._logger.debug(
-                    'All txs have been fetched'
-                )
+                self._logger.debug('All txs have been fetched')
                 return transfers_max_block, transfers
