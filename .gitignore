@@ -139,3 +139,6 @@ test.py
 tst.py
 
 .DS_Store
+
+# vscode
+.vscode/
