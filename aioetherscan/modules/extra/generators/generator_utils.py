@@ -18,71 +18,72 @@ class GeneratorUtils:
         self._client = client
 
     async def token_transfers(
-            self,
-            contract_address: str = None,
-            address: str = None,
-            start_block: int = DEFAULT_START_BLOCK,
-            end_block: Optional[int] = None,
-            blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-            blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        self,
+        contract_address: str = None,
+        address: str = None,
+        start_block: int = DEFAULT_START_BLOCK,
+        end_block: Optional[int] = None,
+        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.token_transfers, locals())
         async for transfer in self._parse_by_blocks(**parser_params):
             yield transfer
 
     async def normal_txs(
-            self,
-            address: str,
-            start_block: int = DEFAULT_START_BLOCK,
-            end_block: Optional[int] = None,
-            blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-            blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        self,
+        address: str,
+        start_block: int = DEFAULT_START_BLOCK,
+        end_block: Optional[int] = None,
+        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.normal_txs, locals())
         async for transfer in self._parse_by_blocks(**parser_params):
             yield transfer
 
     async def internal_txs(
-            self,
-            address: str,
-            start_block: int = DEFAULT_START_BLOCK,
-            end_block: Optional[int] = None,
-            blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-            blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
-            txhash: Optional[str] = None,
+        self,
+        address: str,
+        start_block: int = DEFAULT_START_BLOCK,
+        end_block: Optional[int] = None,
+        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        txhash: Optional[str] = None,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.internal_txs, locals())
         async for transfer in self._parse_by_blocks(**parser_params):
             yield transfer
 
     async def mined_blocks(
-            self, address: str, blocktype: str, offset: int = 10_000
+        self, address: str, blocktype: str, offset: int = 10_000
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.mined_blocks, locals())
         async for transfer in self._parse_by_pages(**parser_params):
             yield transfer
 
     async def _parse_by_blocks(
-            self,
-            api_method: Callable,
-            request_params: dict[str, Any],
-            start_block: int,
-            end_block: int,
-            blocks_limit: int,
-            blocks_limit_divider: int
+        self,
+        api_method: Callable,
+        request_params: dict[str, Any],
+        start_block: int,
+        end_block: int,
+        blocks_limit: int,
+        blocks_limit_divider: int,
     ) -> AsyncIterator[Transfer]:
         if end_block is None:
             end_block = await self._get_current_block()
 
         blocks_parser = BlocksParser(
-            api_method, request_params,
-            start_block, end_block, blocks_limit, blocks_limit_divider
+            api_method, request_params, start_block, end_block, blocks_limit, blocks_limit_divider
         )
         async for tx in blocks_parser.txs_generator():
             yield tx
 
     @staticmethod
-    async def _parse_by_pages(api_method: Callable, request_params: dict[str, Any]) -> AsyncIterator[Transfer]:
+    async def _parse_by_pages(
+        api_method: Callable, request_params: dict[str, Any]
+    ) -> AsyncIterator[Transfer]:
         page = count(1)
         while True:
             request_params['page'] = next(page)
@@ -109,16 +110,13 @@ class GeneratorUtils:
             dict(
                 api_method=api_method,
                 request_params=request_params,
-                **{k: v for k, v in params.items() if k not in request_params}
+                **{k: v for k, v in params.items() if k not in request_params},
             )
         )
 
     def _get_request_params(self, api_method: Callable, params: dict[str, Any]) -> dict[str, Any]:
         api_method_params = inspect.getfullargspec(api_method).args
         return self._without_keys(
-            {
-                k: v for k, v in params.items()
-                if k in api_method_params
-            },
-            ('self', 'start_block', 'end_block')
+            {k: v for k, v in params.items() if k in api_method_params},
+            ('self', 'start_block', 'end_block'),
         )
