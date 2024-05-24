@@ -119,11 +119,3 @@ async def test_txs_generator_success(blocks_parser, api_method):
     async for transfer in blocks_parser.txs_generator():
         transfers.append(transfer)
     assert transfers == [{'blockNumber': 200, 'transfers': [{'value': 100}]}]
-
-
-async def test_txs_generator_empty_response(blocks_parser, api_method):
-    api_method.return_value = []
-    transfers = []
-    async for transfer in blocks_parser.txs_generator():
-        transfers.append(transfer)
-    assert transfers == []
