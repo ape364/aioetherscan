@@ -8,7 +8,7 @@ from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
 from aioetherscan.modules.extra import ExtraModules, ContractUtils
-from aioetherscan.modules.extra.generators.account_proxy import GeneratorUtils
+from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
 from aioetherscan.modules.extra.link import LinkUtils
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy

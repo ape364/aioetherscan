@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from aioetherscan.modules.extra.contract import ContractUtils
-from aioetherscan.modules.extra.generators.account_proxy import GeneratorUtils
+from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
 from aioetherscan.modules.extra.link import LinkUtils
 from aioetherscan.url_builder import UrlBuilder
 
