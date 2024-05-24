@@ -1,4 +1,4 @@
-from unittest.mock import patch, Mock, call, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
@@ -13,135 +13,122 @@ async def logs():
     await c.close()
 
 
+def test_module(logs):
+    assert logs._module == 'logs'
+
+
 @pytest.mark.asyncio
-async def test_balance(logs):
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await logs.get_logs(
-            from_block=1,
-            to_block=2,
-            address='addr',
-            topics=[
-                'topic',
-            ],
-        )
-        mock.assert_called_once_with(
-            params=dict(
-                module='logs',
-                action='getLogs',
-                fromBlock=1,
-                toBlock=2,
-                address='addr',
-                topic0='topic',
-            )
-        )
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        await logs.get_logs(
-            from_block='latest',
-            to_block='latest',
-            address='addr',
-            topics=[
-                'topic',
-            ],
-        )
-        mock.assert_called_once_with(
-            params=dict(
-                module='logs',
-                action='getLogs',
-                fromBlock='latest',
-                toBlock='latest',
-                address='addr',
-                topic0='topic',
-            )
-        )
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        with patch('aioetherscan.modules.logs.Logs._check_block', new=Mock()) as block_mock:
-            await logs.get_logs(
-                from_block=1,
-                to_block=2,
-                address='addr',
-                topics=['top1', 'top2'],
-                topic_operators=['and'],
-            )
-            block_mock.assert_has_calls([call(1), call(2)])
-            mock.assert_called_once()
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        with patch('aioetherscan.modules.logs.Logs._fill_topics', new=Mock()) as topic_mock:
-            topic_mock.return_value = {}
-            await logs.get_logs(
-                from_block=1,
-                to_block=2,
-                address='addr',
-                topics=[
-                    'topic',
-                ],
-            )
-            topic_mock.assert_called_once_with(
-                [
-                    'topic',
-                ],
-                None,
-            )
-            mock.assert_called_once()
-
-    with patch('aioetherscan.network.Network.get', new=AsyncMock()) as mock:
-        with patch('aioetherscan.modules.logs.Logs._fill_topics', new=Mock()) as topic_mock:
-            topic_mock.return_value = {}
-            await logs.get_logs(
-                from_block=1,
-                to_block=2,
-                address='addr',
-                topics=['top1', 'top2'],
-                topic_operators=['and'],
-            )
-            topic_mock.assert_called_once_with(['top1', 'top2'], ['and'])
-            mock.assert_called_once()
-
-
-def test_check_block(logs):
-    assert logs._check_block(1) == 1
-    assert logs._check_block(0x1) == 1
-    assert logs._check_block('latest') == 'latest'
+async def test_get_logs_raises_value_error_when_no_address_or_topics_provided(logs):
     with pytest.raises(ValueError):
-        logs._check_block('123')
+        await logs.get_logs()
 
 
-def test_fill_topics(logs):
-    assert logs._fill_topics(['top1'], None) == {'topic0': 'top1'}
+@pytest.mark.asyncio
+async def test_get_logs_calls_get_with_correct_parameters(logs):
+    logs._get = AsyncMock(return_value=[])
+    await logs.get_logs(address='0x123', from_block=1, to_block=2)
+    logs._get.assert_called_once_with(
+        action='getLogs',
+        address='0x123',
+        fromBlock=1,
+        toBlock=2,
+        page=None,
+        offset=None,
+    )
 
-    topics = ['top1', 'top2']
-    topic_operators = ['or']
-    assert logs._fill_topics(topics, topic_operators) == {
-        'topic0': 'top1',
-        'topic1': 'top2',
-        'topic0_1_opr': 'or',
-    }
 
-    topics = ['top1', 'top2', 'top3']
-    topic_operators = ['or', 'and']
-    assert logs._fill_topics(topics, topic_operators) == {
-        'topic0': 'top1',
-        'topic1': 'top2',
-        'topic2': 'top3',
-        'topic0_1_opr': 'or',
-        'topic1_2_opr': 'and',
-    }
+@pytest.mark.asyncio
+async def test_get_logs_calls_fill_topics_with_correct_parameters(logs):
+    logs._get = AsyncMock(return_value=[])
+    logs._fill_topics = Mock(return_value={})
+    await logs.get_logs(topics={0: '0x123'}, operators=[(0, 1, 'and')])
+    logs._fill_topics.assert_called_once_with(
+        {0: '0x123'},
+        [(0, 1, 'and')],
+    )
 
-    with patch('aioetherscan.modules.logs.Logs._check_topics', new=Mock()) as check_topics_mock:
+
+@pytest.mark.asyncio
+async def test_get_logs_returns_result_of_get(logs):
+    logs._get = AsyncMock(return_value=[{'log': 'entry'}])
+    result = await logs.get_logs(address='0x123', from_block=1, to_block=2)
+    assert result == [{'log': 'entry'}]
+
+
+@pytest.mark.asyncio
+async def test_get_logs_calls_get_with_page_and_offset(logs):
+    logs._get = AsyncMock(return_value=[])
+    await logs.get_logs(address='0x123', from_block=1, to_block=2, page=3, offset=10)
+    logs._get.assert_called_once_with(
+        action='getLogs',
+        address='0x123',
+        fromBlock=1,
+        toBlock=2,
+        page=3,
+        offset=10,
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_logs_raises_value_error_when_both_address_and_topics_are_empty(logs):
+    with pytest.raises(ValueError):
+        await logs.get_logs()
+
+
+def test_fill_topics_none(logs):
+    topics = None
+    topic_operators = None
+    assert logs._fill_topics(topics, topic_operators) == {}
+
+
+def test_fill_topics_one_element(logs):
+    topics = {0: '0x123'}
+    topic_operators = None
+    assert logs._fill_topics(topics, topic_operators) == {'topic0': '0x123'}
+
+
+def test_fill_topics_multiple_elements_none(logs):
+    topics = {0: '0x123', 1: '0x456'}
+    topic_operators = None
+    with pytest.raises(ValueError):
         logs._fill_topics(topics, topic_operators)
-        check_topics_mock.assert_called_once_with(topics, topic_operators)
 
 
-def test_check_topics(logs):
-    with pytest.raises(ValueError):
-        logs._check_topics([], [])
+def test_fill_topics_multiple_elements_operators(logs):
+    topics = {0: '0x123', 1: '0x456', 3: '0x789'}
+    topic_operators = {(0, 1, 'and'), (1, 2, 'or'), (0, 3, 'or')}
+    assert logs._fill_topics(topics, topic_operators) == {
+        'topic0': '0x123',
+        'topic1': '0x456',
+        'topic3': '0x789',
+        'topic0_1_opr': 'and',
+        'topic1_2_opr': 'or',
+        'topic0_3_opr': 'or',
+    }
 
-    with pytest.raises(ValueError):
-        logs._check_topics([], ['xor'])
 
-    with pytest.raises(ValueError):
-        logs._check_topics(['top1'], ['or'])
+def test_fill_topic_operators_ok(logs):
+    topic_operators = {(0, 1, 'and'), (1, 2, 'or'), (0, 3, 'or'), (0, 2, 'and')}
+    assert logs._fill_topic_operators(topic_operators) == {
+        'topic0_1_opr': 'and',
+        'topic1_2_opr': 'or',
+        'topic0_3_opr': 'or',
+        'topic0_2_opr': 'and',
+    }
 
-    assert logs._check_topics(['top1', 'top2'], ['or']) is None
+
+@pytest.mark.parametrize(
+    'topic_operators',
+    [
+        {(0, 1, 'and'), (1, 0, 'or'), (0, 3, 'or')},  # duplicate
+        {(0, 1, 'and'), (1, 2, 'or'), (3, 3, 'or')},  # same topic twice
+        {(0, 1, 'and'), (1, 0, 'or'), (3, 3, 'or')},  # both
+    ],
+)
+def test_fill_topic_operators_exception(logs, topic_operators):
+    with pytest.raises(ValueError) as exc_info:
+        logs._fill_topic_operators(topic_operators)
+    assert (
+        str(exc_info.value)
+        == 'Topic operators must be used with 2 different topics without duplicates.'
+    )
