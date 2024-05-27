@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch, MagicMock, AsyncMock
 
 import pytest
 
+from aioetherscan.exceptions import EtherscanClientApiError
 from aioetherscan.modules.extra.generators.blocks_parser import BlocksParser
 from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
 
@@ -196,3 +197,29 @@ async def test_parse_by_blocks_end_block_is_none(generator_utils):
     blocks_parser_mock.assert_called_once_with(
         None, {'param': 'value'}, 100, current_block, 1000, 2
     )
+
+
+async def test_get_current_block(generator_utils):
+    generator_utils._client = Mock()
+    generator_utils._client.proxy.block_number = AsyncMock(return_value='0x2d0')
+
+    result = await generator_utils._get_current_block()
+
+    generator_utils._client.proxy.block_number.assert_awaited_once()
+    assert isinstance(result, int)
+    assert result == int('0x2d0', 16)
+
+
+async def test_get_current_block_error(generator_utils):
+    generator_utils._client = Mock()
+    generator_utils._client.proxy.block_number = AsyncMock(
+        side_effect=EtherscanClientApiError('message', 'code')
+    )
+
+    with pytest.raises(EtherscanClientApiError) as e:
+        await generator_utils._get_current_block()
+
+    generator_utils._client.proxy.block_number.assert_awaited_once()
+
+    assert e.value.message == 'message'
+    assert e.value.result == 'code'
