@@ -1,7 +1,8 @@
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 
 import pytest
 
+from aioetherscan.modules.extra.generators.blocks_parser import BlocksParser
 from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
 
 
@@ -14,11 +15,32 @@ async def parse_mock(*args, **kwargs):
     yield None
 
 
+def test_transfers() -> list[dict[str, str]]:
+    return [{'result': 'transfer1'}, {'result': 'transfer2'}]
+
+
+async def transfers_mock(*args, **kwargs):
+    for t in test_transfers():
+        yield t
+
+
 def test_init_with_default_values():
     client = Mock()
     utils = GeneratorUtils(client)
 
     assert utils._client == client
+
+
+def test_get_blocks_parser(generator_utils):
+    blocks_parser = BlocksParser(
+        api_method=None,
+        request_params={'param': 'value'},
+        start_block=100,
+        end_block=200,
+        blocks_limit=1000,
+        blocks_limit_divider=2,
+    )
+    assert isinstance(blocks_parser, BlocksParser)
 
 
 @pytest.mark.asyncio
@@ -126,3 +148,51 @@ async def test_mined_blocks(generator_utils):
         )
 
         mock.assert_called_once_with(param='value')
+
+
+@pytest.mark.asyncio
+async def test_parse_by_blocks(generator_utils):
+    blocks_parser_mock = Mock()
+    blocks_parser_mock.return_value.txs_generator = MagicMock(side_effect=transfers_mock)
+    generator_utils._get_blocks_parser = blocks_parser_mock
+
+    transfers = []
+    async for transfer in generator_utils._parse_by_blocks(
+        api_method=None,
+        request_params={'param': 'value'},
+        start_block=100,
+        end_block=200,
+        blocks_limit=1000,
+        blocks_limit_divider=2,
+    ):
+        transfers.append(transfer)
+    assert transfers == test_transfers()
+
+    blocks_parser_mock.assert_called_once_with(None, {'param': 'value'}, 100, 200, 1000, 2)
+
+
+async def test_parse_by_blocks_end_block_is_none(generator_utils):
+    blocks_parser_mock = Mock()
+    blocks_parser_mock.return_value.txs_generator = MagicMock(side_effect=transfers_mock)
+    generator_utils._get_blocks_parser = blocks_parser_mock
+
+    current_block = 200
+    get_current_block_mock = AsyncMock(return_value=current_block)
+    generator_utils._get_current_block = get_current_block_mock
+
+    transfers = []
+    async for transfer in generator_utils._parse_by_blocks(
+        api_method=None,
+        request_params={'param': 'value'},
+        start_block=100,
+        end_block=None,
+        blocks_limit=1000,
+        blocks_limit_divider=2,
+    ):
+        transfers.append(transfer)
+    assert transfers == test_transfers()
+
+    get_current_block_mock.assert_awaited_once()
+    blocks_parser_mock.assert_called_once_with(
+        None, {'param': 'value'}, 100, current_block, 1000, 2
+    )

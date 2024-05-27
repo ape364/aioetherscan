@@ -74,7 +74,7 @@ class GeneratorUtils:
         if end_block is None:
             end_block = await self._get_current_block()
 
-        blocks_parser = BlocksParser(
+        blocks_parser = self._get_blocks_parser(
             api_method, request_params, start_block, end_block, blocks_limit, blocks_limit_divider
         )
         async for tx in blocks_parser.txs_generator():
@@ -119,4 +119,17 @@ class GeneratorUtils:
         return self._without_keys(
             {k: v for k, v in params.items() if k in api_method_params},
             ('self', 'start_block', 'end_block'),
+        )
+
+    @staticmethod
+    def _get_blocks_parser(
+        api_method: Callable,
+        request_params: dict[str, Any],
+        start_block: int,
+        end_block: int,
+        blocks_limit: int,
+        blocks_limit_divider: int,
+    ) -> BlocksParser:
+        return BlocksParser(
+            api_method, request_params, start_block, end_block, blocks_limit, blocks_limit_divider
         )
