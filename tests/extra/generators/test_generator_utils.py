@@ -32,7 +32,7 @@ def test_init_with_default_values():
 
 
 def test_get_blocks_parser(generator_utils):
-    blocks_parser = BlocksParser(
+    blocks_parser = generator_utils._get_blocks_parser(
         api_method=None,
         request_params={'param': 'value'},
         start_block=100,
