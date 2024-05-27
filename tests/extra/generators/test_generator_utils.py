@@ -223,3 +223,17 @@ async def test_get_current_block_error(generator_utils):
 
     assert e.value.message == 'message'
     assert e.value.result == 'code'
+
+
+@pytest.mark.parametrize(
+    'params, excluded, expected',
+    [
+        ({'a': 1, 'b': 2, 'c': 3}, ('a', 'b'), {'c': 3}),
+        ({'a': 1, 'b': 2, 'c': 3}, ('b', 'c'), {'a': 1}),
+        ({'a': 1, 'b': 2, 'c': 3}, ('a', 'c'), {'b': 2}),
+        ({'a': 1, 'b': 2, 'c': 3}, ('a', 'b', 'c'), {}),
+        ({'a': 1, 'b': 2, 'c': 3}, ('d', 'e'), {'a': 1, 'b': 2, 'c': 3}),
+    ],
+)
+def test_without_keys(generator_utils, params, excluded, expected):
+    assert generator_utils._without_keys(params, excluded) == expected
