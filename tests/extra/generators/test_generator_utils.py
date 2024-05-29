@@ -16,12 +16,12 @@ async def parse_mock(*args, **kwargs):
     yield None
 
 
-def test_transfers() -> list[dict[str, str]]:
+def transfers_for_test() -> list[dict[str, str]]:
     return [{'result': 'transfer1'}, {'result': 'transfer2'}]
 
 
 async def transfers_mock(*args, **kwargs):
-    for t in test_transfers():
+    for t in transfers_for_test():
         yield t
 
 
@@ -167,7 +167,7 @@ async def test_parse_by_blocks(generator_utils):
         blocks_limit_divider=2,
     ):
         transfers.append(transfer)
-    assert transfers == test_transfers()
+    assert transfers == transfers_for_test()
 
     blocks_parser_mock.assert_called_once_with(None, {'param': 'value'}, 100, 200, 1000, 2)
 
@@ -191,7 +191,7 @@ async def test_parse_by_blocks_end_block_is_none(generator_utils):
         blocks_limit_divider=2,
     ):
         transfers.append(transfer)
-    assert transfers == test_transfers()
+    assert transfers == transfers_for_test()
 
     get_current_block_mock.assert_awaited_once()
     blocks_parser_mock.assert_called_once_with(
