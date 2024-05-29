@@ -55,12 +55,12 @@ class Network:
         return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
     def _get_retry_client(self) -> RetryClient:
-        if self._timeout is not None:
-            session = ClientSession(loop=self._loop, timeout=self._timeout)
-        else:
-            session = ClientSession(loop=self._loop)
+        return RetryClient(client_session=self._get_session(), retry_options=self._retry_options)
 
-        return RetryClient(client_session=session, retry_options=self._retry_options)
+    def _get_session(self) -> ClientSession:
+        if self._timeout is not None:
+            return ClientSession(loop=self._loop, timeout=self._timeout)
+        return ClientSession(loop=self._loop)
 
     async def _request(
         self, method: str, data: Dict = None, params: Dict = None
