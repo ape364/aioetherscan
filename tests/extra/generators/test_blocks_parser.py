@@ -1,5 +1,5 @@
 import logging
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
@@ -113,9 +113,19 @@ async def test_fetch_blocks_range_no_txs(blocks_parser, api_method):
     assert transfers == []
 
 
-async def test_txs_generator_success(blocks_parser, api_method):
-    api_method.return_value = [{'blockNumber': 200, 'transfers': [{'value': 100}]}]
+async def test_txs_generator(blocks_parser, api_method):
+    api_method.side_effect = [
+        EtherscanClientApiError('Test exception', 'result'),
+        [{'blockNumber': 200, 'transfers': [{'value': 100}]}],
+    ]
+    blocks_parser._blocks_range.limit.reduce = Mock()
+    blocks_parser._blocks_range.limit.restore = Mock()
+
     transfers = []
     async for transfer in blocks_parser.txs_generator():
         transfers.append(transfer)
+
+    blocks_parser._blocks_range.limit.reduce.assert_called_once()
+    blocks_parser._blocks_range.limit.restore.assert_called_once()
+
     assert transfers == [{'blockNumber': 200, 'transfers': [{'value': 100}]}]
