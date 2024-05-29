@@ -237,3 +237,22 @@ async def test_get_current_block_error(generator_utils):
 )
 def test_without_keys(generator_utils, params, excluded, expected):
     assert generator_utils._without_keys(params, excluded) == expected
+
+
+def test_get_request_params(generator_utils):
+    api_method = object()
+
+    generator_utils._without_keys = Mock(return_value={'param1': 'value1', 'param2': 'value2'})
+
+    with patch('inspect.getfullargspec') as getfullargspec_mock:
+        getfullargspec_mock.return_value.args = ['self', 'param1', 'param3']
+
+        result = generator_utils._get_request_params(
+            api_method, {'param1': 'value1', 'param2': 'value2'}
+        )
+
+        getfullargspec_mock.assert_called_once_with(api_method)
+        generator_utils._without_keys.assert_called_once_with(
+            {'param1': 'value1'}, ('self', 'start_block', 'end_block')
+        )
+        assert result == generator_utils._without_keys.return_value
