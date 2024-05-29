@@ -256,3 +256,19 @@ def test_get_request_params(generator_utils):
             {'param1': 'value1'}, ('self', 'start_block', 'end_block')
         )
         assert result == generator_utils._without_keys.return_value
+
+
+def test_get_parser_params(generator_utils):
+    api_method = object()
+    params = {'param1': 'value1', 'param2': 'value2', 'param3': 'value3'}
+
+    generator_utils._get_request_params = Mock(return_value={'param1': 'value1'})
+    result = generator_utils._get_parser_params(api_method, params)
+
+    generator_utils._get_request_params.assert_called_once_with(api_method, params)
+
+    assert result == dict(
+        api_method=api_method,
+        request_params=generator_utils._get_request_params.return_value,
+        **{'param2': 'value2', 'param3': 'value3'},
+    )

@@ -106,12 +106,10 @@ class GeneratorUtils:
 
     def _get_parser_params(self, api_method: Callable, params: dict[str, Any]) -> dict[str, Any]:
         request_params = self._get_request_params(api_method, params)
-        return self._without_keys(
-            dict(
-                api_method=api_method,
-                request_params=request_params,
-                **{k: v for k, v in params.items() if k not in request_params},
-            )
+        return dict(
+            api_method=api_method,
+            request_params=request_params,
+            **{k: v for k, v in params.items() if k not in request_params},
         )
 
     def _get_request_params(self, api_method: Callable, params: dict[str, Any]) -> dict[str, Any]:
