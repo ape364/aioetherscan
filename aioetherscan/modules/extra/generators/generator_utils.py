@@ -5,7 +5,7 @@ from typing import Callable, Any, Optional, TYPE_CHECKING, AsyncIterator
 from aioetherscan.exceptions import EtherscanClientApiError
 from aioetherscan.modules.extra.generators.blocks_parser import BlocksParser, Transfer
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aioetherscan import Client
 
 

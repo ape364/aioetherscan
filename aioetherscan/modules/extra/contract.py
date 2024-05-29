@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from aioetherscan.exceptions import EtherscanClientApiError
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aioetherscan import Client
 
 
@@ -17,7 +17,10 @@ class ContractUtils:
         try:
             response = await self._client.contract.contract_abi(address=address)
         except EtherscanClientApiError as e:
-            if e.message.upper() == 'NOTOK' and e.result.lower() == 'contract source code not verified':
+            if (
+                e.message.upper() == 'NOTOK'
+                and e.result.lower() == 'contract source code not verified'
+            ):
                 return False
             raise
         else:
@@ -26,10 +29,7 @@ class ContractUtils:
     async def get_contract_creator(self, contract_address: str) -> Optional[str]:
         try:
             response = await self._client.account.internal_txs(
-                address=contract_address,
-                start_block=1,
-                page=1,
-                offset=1
+                address=contract_address, start_block=1, page=1, offset=1
             )  # try to find first internal transaction
         except EtherscanClientApiError as e:
             if e.message == 'No transactions found':
@@ -40,10 +40,7 @@ class ContractUtils:
         if not response:
             try:
                 response = await self._client.account.normal_txs(
-                    address=contract_address,
-                    start_block=1,
-                    page=1,
-                    offset=1
+                    address=contract_address, start_block=1, page=1, offset=1
                 )  # try to find first normal transaction
             except EtherscanClientApiError as e:
                 if e.message == 'No transactions found':

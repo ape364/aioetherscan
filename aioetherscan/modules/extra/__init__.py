@@ -5,7 +5,7 @@ from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
 from aioetherscan.modules.extra.link import LinkUtils
 from aioetherscan.url_builder import UrlBuilder
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aioetherscan import Client
 
 
