@@ -214,7 +214,7 @@ async def test_parse_by_pages_ok(generator_utils):
 
 
 async def test_parse_by_pages_error(generator_utils):
-    api_method = AsyncMock(side_effect=EtherscanClientApiError('test error'))
+    api_method = AsyncMock(side_effect=EtherscanClientApiError('test error', 'result'))
     params = {'param': 'value'}
 
     with pytest.raises(EtherscanClientApiError) as e:
