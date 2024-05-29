@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Iterable
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from aioetherscan.modules.extra.generators.blocks_parser import Transfer
 
 
