@@ -199,6 +199,31 @@ async def test_parse_by_blocks_end_block_is_none(generator_utils):
     )
 
 
+async def test_parse_by_pages_ok(generator_utils):
+    api_method = AsyncMock(return_value=['row1', 'row2'])
+    params = {'param': 'value'}
+
+    result = []
+    async for row in generator_utils._parse_by_pages(api_method, params):
+        result.append(row)
+
+        if len(row) > 1:
+            api_method.side_effect = EtherscanClientApiError('No transactions found', 'result')
+
+    assert result == api_method.return_value
+
+
+async def test_parse_by_pages_error(generator_utils):
+    api_method = AsyncMock(side_effect=ValueError('test error'))
+    params = {'param': 'value'}
+
+    with pytest.raises(ValueError) as e:
+        async for _ in generator_utils._parse_by_pages(api_method, params):
+            break
+
+    assert e.value.args[0] == 'test error'
+
+
 async def test_get_current_block(generator_utils):
     generator_utils._client = Mock()
     generator_utils._client.proxy.block_number = AsyncMock(return_value='0x2d0')
