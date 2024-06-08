@@ -65,7 +65,7 @@ class Logs(BaseModule):
     @staticmethod
     def _fill_topic_operators(operators: TopicOperators) -> dict[str, str]:
         same_topic_twice = 1 in (len(set(i[:2])) for i in operators)
-        duplicate = len(set(frozenset(sorted(i[:2])) for i in operators)) != len(operators)
+        duplicate = len({frozenset(sorted(i[:2])) for i in operators}) != len(operators)
 
         if same_topic_twice or duplicate:
             raise ValueError(
