@@ -4,7 +4,7 @@ import pytest
 
 from aioetherscan.modules.extra.generators.blocks_range import Limit, BlocksRange
 
-INITIAL_LIMIT = 2 ** 4
+INITIAL_LIMIT = 2**4
 BLOCKS_RANGE_DIVIDER = 2
 
 START_BLOCK = 1000
@@ -64,6 +64,7 @@ def test_limit_get(limit: Limit):
 
 
 # ############################### blocks range ################################
+
 
 def test_br_init(br: BlocksRange):
     assert br.start_block == START_BLOCK

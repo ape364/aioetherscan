@@ -1,4 +1,5 @@
 import inspect
+import sys
 from itertools import count
 from typing import Callable, Any, Optional, TYPE_CHECKING, AsyncIterator
 
@@ -10,9 +11,10 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class GeneratorUtils:
-    DEFAULT_START_BLOCK: int = 0
-    DEFAULT_BLOCKS_LIMIT: int = 2048
-    DEFAULT_BLOCKS_LIMIT_DIVIDER: int = 2
+    _DEFAULT_START_BLOCK: int = 0
+    _DEFAULT_END_BLOCK: int = sys.maxsize
+    _DEFAULT_BLOCKS_LIMIT: int = 2048
+    _DEFAULT_BLOCKS_LIMIT_DIVIDER: int = 2
 
     def __init__(self, client: 'Client') -> None:
         self._client = client
@@ -21,10 +23,10 @@ class GeneratorUtils:
         self,
         contract_address: str = None,
         address: str = None,
-        start_block: int = DEFAULT_START_BLOCK,
-        end_block: Optional[int] = None,
-        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        start_block: int = _DEFAULT_START_BLOCK,
+        end_block: int = _DEFAULT_END_BLOCK,
+        blocks_limit: int = _DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = _DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.token_transfers, locals())
         async for transfer in self._parse_by_blocks(**parser_params):
@@ -33,10 +35,10 @@ class GeneratorUtils:
     async def normal_txs(
         self,
         address: str,
-        start_block: int = DEFAULT_START_BLOCK,
-        end_block: Optional[int] = None,
-        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        start_block: int = _DEFAULT_START_BLOCK,
+        end_block: int = _DEFAULT_END_BLOCK,
+        blocks_limit: int = _DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = _DEFAULT_BLOCKS_LIMIT_DIVIDER,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.normal_txs, locals())
         async for transfer in self._parse_by_blocks(**parser_params):
@@ -45,10 +47,10 @@ class GeneratorUtils:
     async def internal_txs(
         self,
         address: str,
-        start_block: int = DEFAULT_START_BLOCK,
-        end_block: Optional[int] = None,
-        blocks_limit: int = DEFAULT_BLOCKS_LIMIT,
-        blocks_limit_divider: int = DEFAULT_BLOCKS_LIMIT_DIVIDER,
+        start_block: int = _DEFAULT_START_BLOCK,
+        end_block: int = _DEFAULT_END_BLOCK,
+        blocks_limit: int = _DEFAULT_BLOCKS_LIMIT,
+        blocks_limit_divider: int = _DEFAULT_BLOCKS_LIMIT_DIVIDER,
         txhash: Optional[str] = None,
     ) -> AsyncIterator[Transfer]:
         parser_params = self._get_parser_params(self._client.account.internal_txs, locals())
@@ -71,9 +73,6 @@ class GeneratorUtils:
         blocks_limit: int,
         blocks_limit_divider: int,
     ) -> AsyncIterator[Transfer]:
-        if end_block is None:
-            end_block = await self._get_current_block()
-
         blocks_parser = self._get_blocks_parser(
             api_method, request_params, start_block, end_block, blocks_limit, blocks_limit_divider
         )
@@ -96,9 +95,6 @@ class GeneratorUtils:
             else:
                 for row in result:
                     yield row
-
-    async def _get_current_block(self) -> int:
-        return int(await self._client.proxy.block_number(), 16)
 
     @staticmethod
     def _without_keys(params: dict, excluded_keys: tuple[str, ...] = ('self',)) -> dict:

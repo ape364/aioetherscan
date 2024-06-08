@@ -26,7 +26,9 @@ class Limit:
 
 
 class BlocksRange:
-    def __init__(self, start_block: int, end_block: int, blocks_limit: int, blocks_limit_divider: int) -> None:
+    def __init__(
+        self, start_block: int, end_block: int, blocks_limit: int, blocks_limit_divider: int
+    ) -> None:
         self.start_block = start_block
         self.end_block = end_block
 
