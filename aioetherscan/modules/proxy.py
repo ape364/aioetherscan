@@ -1,4 +1,4 @@
-from typing import Union, Dict
+from typing import Union
 
 from aioetherscan.common import check_hex, check_tag
 from aioetherscan.modules.base import BaseModule
@@ -18,7 +18,7 @@ class Proxy(BaseModule):
         """Returns the number of most recent block."""
         return await self._get(action='eth_blockNumber')
 
-    async def block_by_number(self, full: bool, tag: Union[int, str] = 'latest') -> Dict:
+    async def block_by_number(self, full: bool, tag: Union[int, str] = 'latest') -> dict:
         """Returns information about a block by block number."""
         return await self._get(
             action='eth_getBlockByNumber',
@@ -28,7 +28,7 @@ class Proxy(BaseModule):
 
     async def uncle_block_by_number_and_index(
         self, index: Union[int, str], tag: Union[int, str] = 'latest'
-    ) -> Dict:
+    ) -> dict:
         """Returns information about a uncle by block number."""
         return await self._get(
             action='eth_getUncleByBlockNumberAndIndex',
@@ -43,7 +43,7 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def tx_by_hash(self, txhash: Union[int, str]) -> Dict:
+    async def tx_by_hash(self, txhash: Union[int, str]) -> dict:
         """Returns the information about a transaction requested by transaction hash."""
         return await self._get(
             action='eth_getTransactionByHash',
@@ -52,7 +52,7 @@ class Proxy(BaseModule):
 
     async def tx_by_number_and_index(
         self, index: Union[int, str], tag: Union[int, str] = 'latest'
-    ) -> Dict:
+    ) -> dict:
         """Returns information about a transaction by block number and transaction index position."""
         return await self._get(
             action='eth_getTransactionByBlockNumberAndIndex',
@@ -68,11 +68,11 @@ class Proxy(BaseModule):
             tag=check_tag(tag),
         )
 
-    async def send_raw_tx(self, raw_hex: str) -> Dict:
+    async def send_raw_tx(self, raw_hex: str) -> dict:
         """Creates new message call transaction or a contract creation for signed transactions."""
         return await self._post(module='proxy', action='eth_sendRawTransaction', hex=raw_hex)
 
-    async def tx_receipt(self, txhash: str) -> Dict:
+    async def tx_receipt(self, txhash: str) -> dict:
         """Returns the receipt of a transaction by transaction hash."""
         return await self._get(
             action='eth_getTransactionReceipt',
