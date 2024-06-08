@@ -177,26 +177,19 @@ async def test_parse_by_blocks_end_block_is_none(generator_utils):
     blocks_parser_mock.return_value.txs_generator = MagicMock(side_effect=transfers_mock)
     generator_utils._get_blocks_parser = blocks_parser_mock
 
-    current_block = 200
-    get_current_block_mock = AsyncMock(return_value=current_block)
-    generator_utils._get_current_block = get_current_block_mock
-
     transfers = []
     async for transfer in generator_utils._parse_by_blocks(
         api_method=None,
         request_params={'param': 'value'},
         start_block=100,
-        end_block=None,
+        end_block=200,
         blocks_limit=1000,
         blocks_limit_divider=2,
     ):
         transfers.append(transfer)
     assert transfers == transfers_for_test()
 
-    get_current_block_mock.assert_awaited_once()
-    blocks_parser_mock.assert_called_once_with(
-        None, {'param': 'value'}, 100, current_block, 1000, 2
-    )
+    blocks_parser_mock.assert_called_once_with(None, {'param': 'value'}, 100, 200, 1000, 2)
 
 
 async def test_parse_by_pages_ok(generator_utils):
@@ -222,32 +215,6 @@ async def test_parse_by_pages_error(generator_utils):
             break
 
     assert e.value.args[0] == 'test error'
-
-
-async def test_get_current_block(generator_utils):
-    generator_utils._client = Mock()
-    generator_utils._client.proxy.block_number = AsyncMock(return_value='0x2d0')
-
-    result = await generator_utils._get_current_block()
-
-    generator_utils._client.proxy.block_number.assert_awaited_once()
-    assert isinstance(result, int)
-    assert result == int('0x2d0', 16)
-
-
-async def test_get_current_block_error(generator_utils):
-    generator_utils._client = Mock()
-    generator_utils._client.proxy.block_number = AsyncMock(
-        side_effect=EtherscanClientApiError('message', 'code')
-    )
-
-    with pytest.raises(EtherscanClientApiError) as e:
-        await generator_utils._get_current_block()
-
-    generator_utils._client.proxy.block_number.assert_awaited_once()
-
-    assert e.value.message == 'message'
-    assert e.value.result == 'code'
 
 
 @pytest.mark.parametrize(

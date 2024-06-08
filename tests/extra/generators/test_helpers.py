@@ -1,4 +1,8 @@
-from aioetherscan.modules.extra.generators.helpers import tx_block_number, drop_block, get_max_block_number
+from aioetherscan.modules.extra.generators.helpers import (
+    tx_block_number,
+    drop_block,
+    get_max_block_number,
+)
 
 
 def test_tx_block_number():
@@ -28,7 +32,7 @@ def test_drop_block():
 
 
 def test_get_max_block_number():
-    max_block_number = 2 ** 16
+    max_block_number = 2**16
     transfers = [
         dict(blockNumber=123),
         dict(blockNumber=max_block_number),
