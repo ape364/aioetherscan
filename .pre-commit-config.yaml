@@ -12,7 +12,7 @@ repos:
       - id: trailing-whitespace
       - id: double-quote-string-fixer
   - repo: https://github.com/python-poetry/poetry
-    rev: 1.7.1
+    rev: 1.8.3
     hooks:
       - id: poetry-check
       - id: poetry-lock
@@ -24,7 +24,7 @@ repos:
         args: [-f, requirements.txt, -o, requirements.txt, --without-hashes]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.1.6
+    rev: v0.4.8
     hooks:
       # Run the linter.
       - id: ruff
