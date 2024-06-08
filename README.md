@@ -24,9 +24,10 @@ Supports all API modules:
 * [Gas Tracker](https://docs.etherscan.io/api-endpoints/gas-tracker)
 * [Stats](https://docs.etherscan.io/api-endpoints/stats-1)
 
-Also provides extra modules:
-* `utils` allows to fetch a lot of transactions without timeouts and not getting banned
-* `links` helps to compose links to address/tx/etc
+Also provides `extra` module, which supports:
+* `link` helps to compose links to address/tx/etc
+* `contract` helps to fetch contract data
+* `generators` allows to fetch a lot of transactions without timeouts and not getting banned
 
 ### Blockchains
 
@@ -51,15 +52,18 @@ Register Etherscan account and [create free API key](https://etherscan.io/myapik
 
 ```python
 import asyncio
+import logging
 
 from aiohttp_retry import ExponentialRetry
 from asyncio_throttle import Throttler
 
 from aioetherscan import Client
 
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+
 
 async def main():
-    throttler = Throttler(rate_limit=1, period=6.0)
+    throttler = Throttler(rate_limit=4, period=1.0)
     retry_options = ExponentialRetry(attempts=2)
 
     c = Client('YourApiKeyToken', throttler=throttler, retry_options=retry_options)
@@ -68,16 +72,21 @@ async def main():
         print(await c.stats.eth_price())
         print(await c.block.block_reward(123456))
 
-        async for t in c.utils.token_transfers_generator(
-                address='0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
-                start_block=16734850,
-                end_block=16734850
+        address = '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
+        async for t in c.extra.generators.token_transfers(
+                address=address,
+                start_block=19921833,
+                end_block=19960851
         ):
             print(t)
+            print(c.extra.link.get_tx_link(t['hash']))
+
+        print(c.extra.link.get_address_link(address))
     finally:
         await c.close()
 
 
 if __name__ == '__main__':
     asyncio.run(main())
+
 ```
