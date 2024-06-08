@@ -1,8 +1,8 @@
 from datetime import date
-from typing import Union, Tuple, Dict
+from typing import Union
 
 
-def check_value(value: str, values: Tuple[str, ...]) -> str:
+def check_value(value: str, values: tuple[str, ...]) -> str:
     if value and value.lower() not in values:
         raise ValueError(f'Invalid value {value!r}, only {values} are supported.')
     return value
@@ -84,7 +84,7 @@ def check_token_standard(token_standard: str) -> str:
     return check_value(token_standard, _TOKEN_STANDARDS)
 
 
-def get_daily_stats_params(action: str, start_date: date, end_date: date, sort: str) -> Dict:
+def get_daily_stats_params(action: str, start_date: date, end_date: date, sort: str) -> dict:
     return dict(
         module='stats',
         action=action,
