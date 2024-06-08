@@ -24,7 +24,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.pytest.ini_options]
 pythonpath = [
-    "."
+    "aioetherscan"
 ]
 asyncio_mode = "auto"
 

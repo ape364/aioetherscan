@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from aioetherscan.modules.extra.links import LinkHelper
+from aioetherscan.modules.extra.link import LinkUtils
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def ub():
 
 @pytest.fixture
 def lh(ub):
-    lh = LinkHelper(ub)
+    lh = LinkUtils(ub)
     yield lh
 
 

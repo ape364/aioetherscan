@@ -1,9 +1,10 @@
 import asyncio
 import json
 import logging
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock, Mock
 
 import aiohttp
+import aiohttp_retry
 import pytest
 import pytest_asyncio
 from aiohttp import ClientTimeout
@@ -115,18 +116,19 @@ async def test_request(nw):
             type(self).__aenter__ = AsyncMock(return_value=MagicMock())
             type(self).__aexit__ = AsyncMock(return_value=MagicMock())
 
-    nw._retry_client = AsyncMock()
-
     throttler_mock = AsyncMock()
     nw._throttler = AsyncMock()
     nw._throttler.__aenter__ = throttler_mock
 
-    get_mock = MagicMockContext()
-    nw._retry_client.get = get_mock
+    retry_client_mock = Mock()
+    retry_client_mock.get = MagicMockContext()
+    retry_client_mock.close = AsyncMock()
+    nw._get_retry_client = Mock(return_value=retry_client_mock)
+
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_GET)
         throttler_mock.assert_awaited_once()
-        get_mock.assert_called_once_with(
+        retry_client_mock.get.assert_called_once_with(
             'https://api.etherscan.io/api', params=None, data=None, proxy=None
         )
         h.assert_called_once()
@@ -135,6 +137,7 @@ async def test_request(nw):
     nw._retry_client.post = post_mock
     with patch('aioetherscan.network.Network._handle_response', new=AsyncMock()) as h:
         await nw._request(METH_POST)
+        nw._get_retry_client.assert_called_once()
         throttler_mock.assert_awaited()
         post_mock.assert_called_once_with(
             'https://api.etherscan.io/api', params=None, data=None, proxy=None
@@ -199,3 +202,39 @@ async def test_close_session(nw):
         nw._retry_client.close = AsyncMock()
         await nw.close()
         nw._retry_client.close.assert_called_once()
+
+
+def test_get_session_timeout_is_none(nw):
+    with patch('aiohttp.ClientSession.__new__', new=Mock()) as m:
+        session = nw._get_session()
+
+        m.assert_called_once_with(
+            aiohttp.ClientSession,
+            loop=nw._loop,
+        )
+
+        assert session is m.return_value
+
+
+def test_get_session_timeout_is_not_none(nw):
+    nw._timeout = 1
+
+    with patch('aiohttp.ClientSession.__new__', new=Mock()) as m:
+        session = nw._get_session()
+
+        m.assert_called_once_with(aiohttp.ClientSession, loop=nw._loop, timeout=nw._timeout)
+
+        assert session is m.return_value
+
+
+def test_get_retry_client(nw):
+    nw._get_session = Mock()
+
+    with patch('aiohttp_retry.RetryClient.__new__', new=Mock()) as m:
+        result = nw._get_retry_client()
+        m.assert_called_once_with(
+            aiohttp_retry.RetryClient,
+            client_session=nw._get_session.return_value,
+            retry_options=nw._retry_options,
+        )
+        assert result is m.return_value

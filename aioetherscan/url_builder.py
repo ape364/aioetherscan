@@ -33,7 +33,7 @@ class UrlBuilder:
                 f'Incorrect api_kind {api_kind!r}, supported only: {", ".join(self._API_KINDS)}'
             )
         else:
-            self._api_kind = api_kind
+            self.api_kind = api_kind
 
     @property
     def _is_main(self) -> bool:
@@ -41,12 +41,12 @@ class UrlBuilder:
 
     @property
     def _base_netloc(self) -> str:
-        netloc, _ = self._API_KINDS[self._api_kind]
+        netloc, _ = self._API_KINDS[self.api_kind]
         return netloc
 
     @property
     def currency(self) -> str:
-        _, currency = self._API_KINDS[self._api_kind]
+        _, currency = self._API_KINDS[self.api_kind]
         return currency
 
     def get_link(self, path: str) -> str:
@@ -62,20 +62,20 @@ class UrlBuilder:
             ('optimism', False): f'api-{self._network}-optimistic',
         }
         default_prefix = 'api' if self._is_main else f'api-{self._network}'
-        prefix = prefix_exceptions.get((self._api_kind, self._is_main), default_prefix)
+        prefix = prefix_exceptions.get((self.api_kind, self._is_main), default_prefix)
 
         return self._build_url(prefix, 'api')
 
     def _get_base_url(self) -> str:
         network_exceptions = {('polygon', 'testnet'): 'mumbai'}
-        network = network_exceptions.get((self._api_kind, self._network), self._network)
+        network = network_exceptions.get((self.api_kind, self._network), self._network)
 
         prefix_exceptions = {
             ('optimism', True): 'optimistic',
             ('optimism', False): f'{network}-optimism',
         }
         default_prefix = None if self._is_main else network
-        prefix = prefix_exceptions.get((self._api_kind, self._is_main), default_prefix)
+        prefix = prefix_exceptions.get((self.api_kind, self._is_main), default_prefix)
 
         return self._build_url(prefix)
 

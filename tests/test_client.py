@@ -1,4 +1,4 @@
-from unittest.mock import patch, AsyncMock, PropertyMock
+from unittest.mock import patch, AsyncMock, PropertyMock, Mock
 
 import pytest
 import pytest_asyncio
@@ -7,8 +7,9 @@ from aioetherscan import Client
 from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
-from aioetherscan.modules.extra.links import LinkHelper
-from aioetherscan.modules.extra.utils import Utils
+from aioetherscan.modules.extra import ExtraModules, ContractUtils
+from aioetherscan.modules.extra.generators.generator_utils import GeneratorUtils
+from aioetherscan.modules.extra.link import LinkUtils
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
 from aioetherscan.modules.stats import Stats
@@ -42,8 +43,10 @@ def test_init(client):
     assert isinstance(client.logs, Logs)
     assert isinstance(client.proxy, Proxy)
 
-    assert isinstance(client.utils, Utils)
-    assert isinstance(client.links, LinkHelper)
+    assert isinstance(client.extra, ExtraModules)
+    assert isinstance(client.extra.link, LinkUtils)
+    assert isinstance(client.extra.contract, ContractUtils)
+    assert isinstance(client.extra.generators, GeneratorUtils)
 
     assert isinstance(client.account._client, Client)
     assert isinstance(client.block._client, Client)
@@ -53,8 +56,10 @@ def test_init(client):
     assert isinstance(client.logs._client, Client)
     assert isinstance(client.proxy._client, Client)
 
-    assert isinstance(client.utils._client, Client)
-    assert isinstance(client.links._url_builder, UrlBuilder)
+    assert isinstance(client.extra._client, Client)
+    assert isinstance(client.extra.contract._client, Client)
+    assert isinstance(client.extra.generators._client, Client)
+    assert isinstance(client.extra.link._url_builder, UrlBuilder)
 
 
 @pytest.mark.asyncio
@@ -71,3 +76,19 @@ def test_currency(client):
 
         assert client.currency == currency
         m.assert_called_once()
+
+
+def test_api_kind(client):
+    client._url_builder.api_kind = Mock()
+    client._url_builder.api_kind.title = Mock()
+
+    client.api_kind
+
+    client._url_builder.api_kind.assert_not_called()
+    client._url_builder.api_kind.title.assert_called_once()
+
+
+def test_scaner_url(client):
+    url = 'some_url'
+    client._url_builder.BASE_URL = url
+    assert client.scaner_url == url

@@ -7,8 +7,7 @@ from aiohttp_retry import RetryOptionsBase
 from aioetherscan.modules.account import Account
 from aioetherscan.modules.block import Block
 from aioetherscan.modules.contract import Contract
-from aioetherscan.modules.extra.links import LinkHelper
-from aioetherscan.modules.extra.utils import Utils
+from aioetherscan.modules.extra import ExtraModules
 from aioetherscan.modules.gas_tracker import GasTracker
 from aioetherscan.modules.logs import Logs
 from aioetherscan.modules.proxy import Proxy
@@ -43,12 +42,19 @@ class Client:
         self.token = Token(self)
         self.gas_tracker = GasTracker(self)
 
-        self.utils = Utils(self)
-        self.links = LinkHelper(self._url_builder)
+        self.extra = ExtraModules(self, self._url_builder)
 
     @property
     def currency(self) -> str:
         return self._url_builder.currency
+
+    @property
+    def api_kind(self) -> str:
+        return self._url_builder.api_kind.title()
+
+    @property
+    def scaner_url(self) -> str:
+        return self._url_builder.BASE_URL
 
     async def close(self):
         await self._http.close()
