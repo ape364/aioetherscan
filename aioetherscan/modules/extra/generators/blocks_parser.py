@@ -70,6 +70,10 @@ class BlocksParser:
                 return blocks_range.stop, []
             raise
         else:
+            if not transfers:
+                self._logger.debug('No transfers found')
+                return blocks_range.stop, []
+
             transfers_count = len(transfers)
             self._total_txs += transfers_count
             self._logger.debug(f'Got {transfers_count:,} transfers, {self._total_txs:,} total')

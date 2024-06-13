@@ -103,9 +103,18 @@ async def test_fetch_blocks_range_api_error(blocks_parser, api_method):
         await blocks_parser._fetch_blocks_range(blocks_range)
 
 
-async def test_fetch_blocks_range_no_txs(blocks_parser, api_method):
+async def test_fetch_blocks_range_no_txs_with_message(blocks_parser, api_method):
     api_method.side_effect = EtherscanClientApiError('No transactions found', 'result')
 
+    blocks_range = range(100, 101)
+    max_block, transfers = await blocks_parser._fetch_blocks_range(blocks_range)
+
+    assert max_block == blocks_range.stop
+    assert transfers == []
+
+
+async def test_fetch_blocks_range_no_txs_no_message(blocks_parser, api_method):
+    api_method.return_value = []
     blocks_range = range(100, 101)
     max_block, transfers = await blocks_parser._fetch_blocks_range(blocks_range)
 
