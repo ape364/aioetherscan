@@ -38,7 +38,9 @@ class BlocksRange:
 
         self._logger = logging.getLogger(__name__)
 
-        self._logger.debug(f'Initial blocks range: {self._fmt_range()}')
+        self._logger.debug(
+            f'Initial blocks range: {self.start_block:,}..{self.end_block:,} ({self.size:,})'
+        )
 
     @property
     def current_block(self) -> int:
@@ -53,8 +55,11 @@ class BlocksRange:
     def get_blocks_range(self) -> range:
         start_block = self._current_block
         end_block = min(self.end_block, self._current_block + self.limit.get() - 1)
-        self._logger.debug(f'Returning blocks range: {self._fmt_range()}')
-        return range(start_block, end_block)
+        rng = range(start_block, end_block)
+        self._logger.debug(
+            f'Returning blocks range: {rng.start:,}..{rng.stop:,} ({rng.stop - rng.start + 1:,})'
+        )
+        return rng
 
     @property
     def blocks_done(self) -> int:
@@ -67,6 +72,3 @@ class BlocksRange:
     @property
     def size(self) -> int:
         return self.end_block - self.start_block + 1
-
-    def _fmt_range(self) -> str:
-        return f'{self.start_block:,}..{self.end_block:,} ({self.size:,})'
