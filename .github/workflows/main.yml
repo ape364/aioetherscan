@@ -32,6 +32,7 @@ jobs:
         run: poetry install --no-interaction --no-root --with=dev
       - name: Test with pytest
         run: |
+          source .venv/bin/activate
           coverage run --source=aioetherscan -m pytest tests/
       - name: Coveralls
         uses: AndreMiras/coveralls-python-action@develop
