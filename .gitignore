@@ -142,3 +142,8 @@ tst.py
 
 # vscode
 .vscode/
+
+# do not commit pinned dependencies
+poetry.lock
+requirements.dev.txt
+requirements.txt
