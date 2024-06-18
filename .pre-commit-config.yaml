@@ -15,21 +15,12 @@ repos:
     rev: 1.8.3
     hooks:
       - id: poetry-check
-      - id: poetry-lock
-      - id: poetry-export
-        name: poetry-export dev
-        args: [--with, dev, -f, requirements.txt, -o, requirements.dev.txt, --without-hashes]
-      - id: poetry-export
-        name: poetry-export prod
-        args: [-f, requirements.txt, -o, requirements.txt, --without-hashes]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
     rev: v0.4.8
     hooks:
-      # Run the linter.
       - id: ruff
         args: [ --fix, --show-fixes]
-      # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.16.0
