@@ -12,6 +12,7 @@ class UrlBuilder:
         'base': ('basescan.org', 'ETH'),
         'arbitrum': ('arbiscan.io', 'ETH'),
         'fantom': ('ftmscan.com', 'FTM'),
+        'taiko': ('taikoscan.io', 'ETH'),
     }
 
     BASE_URL: str = None
