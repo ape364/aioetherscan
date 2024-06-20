@@ -13,6 +13,7 @@ class UrlBuilder:
         'arbitrum': ('arbiscan.io', 'ETH'),
         'fantom': ('ftmscan.com', 'FTM'),
         'taiko': ('taikoscan.io', 'ETH'),
+        'snowscan': ('snowscan.xyz', 'ETH'),
     }
 
     BASE_URL: str = None
