@@ -53,6 +53,8 @@ def test_filter_params(ub):
         ('arbitrum', 'goerli', 'https://api-goerli.arbiscan.io/api'),
         ('fantom', 'main', 'https://api.ftmscan.com/api'),
         ('fantom', 'testnet', 'https://api-testnet.ftmscan.com/api'),
+        ('taiko', 'main', 'https://api.taikoscan.io/api'),
+        ('taiko', 'hekla', 'https://api-hekla.taikoscan.io/api'),
     ],
 )
 def test_api_url(api_kind, network_name, expected):
@@ -85,6 +87,8 @@ def test_api_url(api_kind, network_name, expected):
         ('arbitrum', 'goerli', 'https://goerli.arbiscan.io'),
         ('fantom', 'main', 'https://ftmscan.com'),
         ('fantom', 'testnet', 'https://testnet.ftmscan.com'),
+        ('taiko', 'main', 'https://taikoscan.io'),
+        ('taiko', 'hekla', 'https://hekla.taikoscan.io'),
     ],
 )
 def test_base_url(api_kind, network_name, expected):
@@ -109,6 +113,7 @@ def test_invalid_api_kind():
         ('base', 'ETH'),
         ('arbitrum', 'ETH'),
         ('fantom', 'FTM'),
+        ('taiko', 'ETH'),
     ],
 )
 def test_currency(api_kind, expected):

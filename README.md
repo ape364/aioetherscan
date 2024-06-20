@@ -41,6 +41,8 @@ Supports blockchain explorers:
 * [Arbiscan](https://docs.arbiscan.io/getting-started/endpoint-urls)
 * [FtmScan](https://docs.ftmscan.com/getting-started/endpoint-urls)
 * [Basescan](https://docs.basescan.org/getting-started/endpoint-urls)
+* [Taikoscan](https://docs.taikoscan.io/getting-started/endpoint-urls)
+
 ## Installation
 
 ```sh
