@@ -55,6 +55,8 @@ def test_filter_params(ub):
         ('fantom', 'testnet', 'https://api-testnet.ftmscan.com/api'),
         ('taiko', 'main', 'https://api.taikoscan.io/api'),
         ('taiko', 'hekla', 'https://api-hekla.taikoscan.io/api'),
+        ('snowscan', 'main', 'https://api.snowscan.xyz/api'),
+        ('snowscan', 'testnet', 'https://api-testnet.snowscan.xyz/api'),
     ],
 )
 def test_api_url(api_kind, network_name, expected):
@@ -89,6 +91,8 @@ def test_api_url(api_kind, network_name, expected):
         ('fantom', 'testnet', 'https://testnet.ftmscan.com'),
         ('taiko', 'main', 'https://taikoscan.io'),
         ('taiko', 'hekla', 'https://hekla.taikoscan.io'),
+        ('snowscan', 'main', 'https://snowscan.xyz'),
+        ('snowscan', 'testnet', 'https://testnet.snowscan.xyz'),
     ],
 )
 def test_base_url(api_kind, network_name, expected):

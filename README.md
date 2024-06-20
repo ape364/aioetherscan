@@ -42,6 +42,7 @@ Supports blockchain explorers:
 * [FtmScan](https://docs.ftmscan.com/getting-started/endpoint-urls)
 * [Basescan](https://docs.basescan.org/getting-started/endpoint-urls)
 * [Taikoscan](https://docs.taikoscan.io/getting-started/endpoint-urls)
+* [SnowScan](https://docs.snowscan.xyz/getting-started/endpoint-urls)
 
 ## Installation
 
