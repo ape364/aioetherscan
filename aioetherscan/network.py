@@ -26,7 +26,7 @@ def retry_limit_attempt(f):
     async def inner(self, *args, **kwargs):
         attempt = 1
         max_attempts = self._url_builder.keys_count
-        while True:
+        while True:  # pragma: no cover
             try:
                 return await f(self, *args, **kwargs)
             except EtherscanClientApiRateLimitError as e:
