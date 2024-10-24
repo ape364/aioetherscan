@@ -31,7 +31,8 @@ def retry_limit_attempt(f):
                 return await f(self, *args, **kwargs)
             except EtherscanClientApiRateLimitError as e:
                 self._logger.warning(f'Key daily limit exceeded, {attempt=}: {e}')
-                if attempt >= max_attempts:
+                attempt += 1
+                if attempt > max_attempts:
                     raise e
                 await asyncio.sleep(0.01)
                 self._url_builder.rotate_api_key()

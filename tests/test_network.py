@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from unittest.mock import patch, AsyncMock, MagicMock, Mock
+from unittest.mock import patch, AsyncMock, MagicMock, Mock, call
 
 import aiohttp
 import aiohttp_retry
@@ -17,8 +17,9 @@ from aioetherscan.exceptions import (
     EtherscanClientError,
     EtherscanClientApiError,
     EtherscanClientProxyError,
+    EtherscanClientApiRateLimitError,
 )
-from aioetherscan.network import Network
+from aioetherscan.network import Network, retry_limit_attempt
 from aioetherscan.url_builder import UrlBuilder
 
 
@@ -45,7 +46,7 @@ def get_loop():
 
 @pytest_asyncio.fixture
 async def ub():
-    ub = UrlBuilder('test_api_key', 'eth', 'main')
+    ub = UrlBuilder(['test_api_key'], 'eth', 'main')
     yield ub
 
 
@@ -238,3 +239,77 @@ def test_get_retry_client(nw):
             retry_options=nw._retry_options,
         )
         assert result is m.return_value
+
+
+def test_raise_if_error_daily_limit_reached(nw):
+    data = dict(
+        status='0',
+        message='NOTOK',
+        result='Max daily rate limit reached. 110000 (100%) of 100000 day/limit',
+    )
+    with pytest.raises(EtherscanClientApiRateLimitError) as e:
+        nw._raise_if_error(data)
+
+    assert e.value.message == data['message']
+    assert e.value.result == data['result']
+
+
+class TestRetryClass:
+    def __init__(self, limit: int, keys_count: int):
+        self._url_builder = Mock()
+        self._url_builder.keys_count = keys_count
+        self._url_builder.rotate_api_key = Mock()
+
+        self._logger = Mock()
+        self._logger.warning = Mock()
+
+        self._count = 1
+        self._limit = limit
+
+    @retry_limit_attempt
+    async def some_method(self):
+        self._count += 1
+
+        if self._count > self._limit:
+            raise EtherscanClientApiRateLimitError(
+                'NOTOK',
+                'Max daily rate limit reached. 110000 (100%) of 100000 day/limit',
+            )
+
+
+@pytest.mark.asyncio
+async def test_retry_limit_attempt_error_limit_exceeded(nw):
+    c = TestRetryClass(1, 1)
+
+    with pytest.raises(EtherscanClientApiRateLimitError):
+        await c.some_method()
+    c._url_builder.rotate_api_key.assert_not_called()
+    c._logger.warning.assert_called_once_with(
+        'Key daily limit exceeded, attempt=1: [NOTOK] Max daily rate limit reached. 110000 (100%) of 100000 day/limit'
+    )
+
+
+@pytest.mark.asyncio
+async def test_retry_limit_attempt_error_limit_rotate(nw):
+    c = TestRetryClass(1, 2)
+
+    with pytest.raises(EtherscanClientApiRateLimitError):
+        await c.some_method()
+    c._url_builder.rotate_api_key.assert_called_once()
+    c._logger.warning.assert_has_calls(
+        [
+            call(
+                'Key daily limit exceeded, attempt=1: [NOTOK] Max daily rate limit reached. 110000 (100%) of 100000 day/limit'
+            ),
+            call(
+                'Key daily limit exceeded, attempt=2: [NOTOK] Max daily rate limit reached. 110000 (100%) of 100000 day/limit'
+            ),
+        ]
+    )
+
+
+@pytest.mark.asyncio
+async def test_retry_limit_attempt_ok(nw):
+    c = TestRetryClass(2, 1)
+
+    await c.some_method()
