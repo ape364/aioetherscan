@@ -1,5 +1,5 @@
 from asyncio import AbstractEventLoop
-from typing import AsyncContextManager
+from typing import AsyncContextManager, Union
 
 from aiohttp import ClientTimeout
 from aiohttp_retry import RetryOptionsBase
@@ -20,7 +20,7 @@ from aioetherscan.network import Network, UrlBuilder
 class Client:
     def __init__(
         self,
-        api_key: str,
+        api_key: Union[str, list[str]],
         api_kind: str = 'eth',
         network: str = 'main',
         loop: AbstractEventLoop = None,
@@ -29,7 +29,8 @@ class Client:
         throttler: AsyncContextManager = None,
         retry_options: RetryOptionsBase = None,
     ) -> None:
-        self._url_builder = UrlBuilder(api_key, api_kind, network)
+        api_keys = [api_key] if isinstance(api_key, str) else api_key
+        self._url_builder = UrlBuilder(api_keys, api_kind, network)
         self._http = Network(self._url_builder, loop, timeout, proxy, throttler, retry_options)
 
         self.account = Account(self)

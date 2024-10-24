@@ -84,7 +84,7 @@ class GeneratorUtils:
         api_method: Callable, request_params: dict[str, Any]
     ) -> AsyncIterator[Transfer]:
         page = count(1)
-        while True:
+        while True:  # pragma: no cover
             request_params['page'] = next(page)
             try:
                 result = await api_method(**request_params)
