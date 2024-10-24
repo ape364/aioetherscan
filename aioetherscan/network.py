@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from asyncio import AbstractEventLoop
+from functools import wraps
 from typing import Union, AsyncContextManager, Optional
 
 import aiohttp
@@ -15,8 +16,27 @@ from aioetherscan.exceptions import (
     EtherscanClientError,
     EtherscanClientApiError,
     EtherscanClientProxyError,
+    EtherscanClientApiRateLimitError,
 )
 from aioetherscan.url_builder import UrlBuilder
+
+
+def retry_limit_attempt(f):
+    @wraps(f)
+    async def inner(self, *args, **kwargs):
+        attempt = 1
+        max_attempts = self._url_builder.keys_count
+        while True:
+            try:
+                return await f(self, *args, **kwargs)
+            except EtherscanClientApiRateLimitError as e:
+                self._logger.warning(f'Key daily limit exceeded, {attempt=}: {e}')
+                if attempt >= max_attempts:
+                    raise e
+                await asyncio.sleep(0.01)
+                self._url_builder.rotate_api_key()
+
+    return inner
 
 
 class Network:
@@ -48,9 +68,11 @@ class Network:
         if self._retry_client is not None:
             await self._retry_client.close()
 
+    @retry_limit_attempt
     async def get(self, params: dict = None) -> Union[dict, list, str]:
         return await self._request(METH_GET, params=self._url_builder.filter_and_sign(params))
 
+    @retry_limit_attempt
     async def post(self, data: dict = None) -> Union[dict, list, str]:
         return await self._request(METH_POST, data=self._url_builder.filter_and_sign(data))
 
@@ -68,6 +90,7 @@ class Network:
         if self._retry_client is None:
             self._retry_client = self._get_retry_client()
         session_method = getattr(self._retry_client, method.lower())
+
         async with self._throttler:
             async with session_method(
                 self._url_builder.API_URL, params=params, data=data, proxy=self._proxy
@@ -93,6 +116,10 @@ class Network:
     def _raise_if_error(response_json: dict):
         if 'status' in response_json and response_json['status'] != '1':
             message, result = response_json.get('message'), response_json.get('result')
+
+            if 'max daily rate limit reached' in result.lower():
+                raise EtherscanClientApiRateLimitError(message, result)
+
             raise EtherscanClientApiError(message, result)
 
         if 'error' in response_json:

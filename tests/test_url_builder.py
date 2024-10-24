@@ -7,7 +7,7 @@ from aioetherscan.url_builder import UrlBuilder
 
 
 def apikey():
-    return 'test_api_key'
+    return ['test_api_key']
 
 
 @pytest_asyncio.fixture
@@ -17,8 +17,8 @@ async def ub():
 
 
 def test_sign(ub):
-    assert ub._sign({}) == {'apikey': ub._API_KEY}
-    assert ub._sign({'something': 'something'}) == {'something': 'something', 'apikey': ub._API_KEY}
+    assert ub._sign({}) == {'apikey': ub._api_key}
+    assert ub._sign({'something': 'something'}) == {'something': 'something', 'apikey': ub._api_key}
 
 
 def test_filter_params(ub):

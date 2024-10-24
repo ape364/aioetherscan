@@ -86,25 +86,25 @@ def test_no_loop(ub):
 async def test_get(nw):
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.get()
-        mock.assert_called_once_with(METH_GET, params={'apikey': nw._url_builder._API_KEY})
+        mock.assert_called_once_with(METH_GET, params={'apikey': nw._url_builder._api_key})
 
 
 @pytest.mark.asyncio
 async def test_post(nw):
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post()
-        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._API_KEY})
+        mock.assert_called_once_with(METH_POST, data={'apikey': nw._url_builder._api_key})
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data'})
         mock.assert_called_once_with(
-            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
+            METH_POST, data={'apikey': nw._url_builder._api_key, 'some': 'data'}
         )
 
     with patch('aioetherscan.network.Network._request', new=AsyncMock()) as mock:
         await nw.post({'some': 'data', 'null': None})
         mock.assert_called_once_with(
-            METH_POST, data={'apikey': nw._url_builder._API_KEY, 'some': 'data'}
+            METH_POST, data={'apikey': nw._url_builder._api_key, 'some': 'data'}
         )
 
 

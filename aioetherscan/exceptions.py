@@ -20,6 +20,10 @@ class EtherscanClientApiError(EtherscanClientError):
         return f'[{self.message}] {self.result}'
 
 
+class EtherscanClientApiRateLimitError(EtherscanClientApiError):
+    pass
+
+
 class EtherscanClientProxyError(EtherscanClientError):
     """JSON-RPC 2.0 Specification
 
