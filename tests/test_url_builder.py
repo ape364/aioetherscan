@@ -1,4 +1,5 @@
-from unittest.mock import patch
+from itertools import cycle
+from unittest.mock import patch, Mock
 
 import pytest
 import pytest_asyncio
@@ -130,3 +131,42 @@ def test_get_link(ub):
         path = 'some_path'
         ub.get_link(path)
         join_mock.assert_called_once_with(ub.BASE_URL, path)
+
+
+@pytest.mark.parametrize(
+    'api_key,masked_chars_count,expected',
+    [
+        ('abc', 4, '***'),
+        ('abc', 2, '**c'),
+        ('abcd', 4, '****'),
+        ('abcdef', 4, '****ef'),
+    ],
+)
+def test_mask_api_key(ub, api_key, masked_chars_count, expected):
+    assert ub._mask_api_key(api_key, masked_chars_count) == expected
+
+    assert ub._mask_api_key('qwe', 2, '#') == '##e'
+
+
+def test_keys_count(ub):
+    ub._api_keys = [1, 2]
+    assert ub.keys_count == 2
+
+
+def test_rotate_api_key(ub):
+    api_keys = ['one', 'two', 'three']
+    first, second, _ = api_keys
+
+    ub._api_keys = api_keys
+    ub._api_keys_cycle = cycle(ub._api_keys)
+    ub._api_key = ub._get_next_api_key()
+
+    assert ub._api_key == first
+
+    ub._logger = Mock()
+    ub._logger.info = Mock()
+
+    ub.rotate_api_key()
+
+    ub._logger.info.assert_called_once()
+    assert ub._api_key == second

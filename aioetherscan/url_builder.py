@@ -108,14 +108,19 @@ class UrlBuilder:
         next_api_key = self._get_next_api_key()
 
         self._logger.info(
-            f'Rotating API key from {self._mask_api_key(prev_api_key)} to {self._mask_api_key(next_api_key)}'
+            f'Rotating API key from {self._mask_api_key(prev_api_key)!r} to {self._mask_api_key(next_api_key)!r}'
         )
 
         self._api_key = next_api_key
 
     @staticmethod
-    def _mask_api_key(api_key: str, masked_chars_count: int = 4) -> str:
-        return '*' * (len(api_key) - masked_chars_count) + api_key[-masked_chars_count:]
+    def _mask_api_key(api_key: str, masked_chars_count: int = 30, symbol: str = '*') -> str:
+        api_key_len = len(api_key)
+        if masked_chars_count >= api_key_len or masked_chars_count <= 0:
+            return symbol * len(api_key)
+
+        right_part = api_key[-(api_key_len - masked_chars_count) :]
+        return right_part.rjust(len(api_key), symbol)
 
     @property
     def keys_count(self) -> int:
